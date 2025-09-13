@@ -10,6 +10,10 @@ export const getDrivers = async () => {
   return await http.get('/getDriver')
 }
 
+//  获取角色  getRoles
+export const getRoles = async () => {
+  return await http.get('/getRoles')
+}
 
 //  添加用户
 export const addUser = async (user) => {

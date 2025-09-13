@@ -9,7 +9,6 @@ export const earlyRoutes = [
       hideSide: false,
       title: '预警管理',
       icon: <VideocamOutlinedIcon />,
-      role: ['admin', 'root']
     },
     children: [
       {
@@ -19,7 +18,6 @@ export const earlyRoutes = [
           hideSide: false,
           title: '气象预警',
           // icon: <FireHydrantAltOutlinedIcon />,
-          role: ['admin', 'root']
         }
       },
       {
@@ -29,7 +27,6 @@ export const earlyRoutes = [
           hideSide: false,
           title: '反制预警',
           // icon: <Battery4BarOutlinedIcon />,
-          role: ['admin', 'root']
         }
       },
     ]

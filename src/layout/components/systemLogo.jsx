@@ -1,26 +1,7 @@
 import { useNavigate, useLocation } from 'react-router';
-import {Typography, IconButton, Box} from '@mui/material';
-import {MenuOpen, Menu} from '@mui/icons-material';
-import {useSidebar} from '@/store';
-// import avatarImage from '@/assets/images/logo-1.svg'
+import {Typography, Box} from '@mui/material';
 
 const SystemLogo = ({ show }) => {
-  const { openSidebar, setSidebar } = useSidebar();
-
-  // const menuIconElement = () => {
-  //   return (
-  //       <IconButton
-  //           edge="start"
-  //           color="inherit"
-  //           aria-label="menu"
-  //           sx={{ mr: 2, p: 1 }}
-  //           onClick={ () => setSidebar(!openSidebar) }
-  //       >
-  //         { openSidebar ? <MenuOpen /> : <Menu /> }
-  //       </IconButton>
-  //   )
-  // }
-
   const navigator = useNavigate()
   const location = useLocation()
   const onRouter = () => {

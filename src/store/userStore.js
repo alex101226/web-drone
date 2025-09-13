@@ -9,11 +9,9 @@ const initialState = {
   status: '',
   position: '',
   department: '',
-  location: '',
   role_id: 1,
   role_name: 'root',
   role_description: '超级管理员',
-  token: '',
 }
 export const useUserStore = create(persist((set, get) => ({
   userInfo: initialState,

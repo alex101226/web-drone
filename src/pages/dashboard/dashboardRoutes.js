@@ -15,7 +15,6 @@ export const dashboardRoutes = [
       icon: <AccessTimeOutlinedIcon />,
       title: '算力管理',
       hideSide: false,
-      role: ['root', 'admin']
     },
     children: [
       {
@@ -24,7 +23,6 @@ export const dashboardRoutes = [
         handle: {
           hideSide: false,
           title: '仪表盘',
-          role: ['admin', 'root']
         },
       },
       {
@@ -33,7 +31,6 @@ export const dashboardRoutes = [
         handle: {
           hideSide: false,
           title: '资源开销',
-          role: ['admin', 'root']
         },
       },
       {
@@ -42,7 +39,6 @@ export const dashboardRoutes = [
         handle: {
           hideSide: false,
           title: '任务管理',
-          role: ['admin', 'root']
         },
       },
     ]

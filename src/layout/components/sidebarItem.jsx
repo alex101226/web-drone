@@ -45,9 +45,8 @@ const SidebarItem = ({list = []}) => {
   }
 
   const isAdmin = (handle) => {
-    const { roles, hideSide } = handle
-    if (hideSide) return true;
-    return userInfo.role_name === 'admin' && !roles.includes('admin')
+    const { hideSide } = handle
+    return hideSide
   };
 
   // 递归渲染函数

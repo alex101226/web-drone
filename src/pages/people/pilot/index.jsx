@@ -4,12 +4,14 @@ import {renderCellExpand} from '@/components/CustomCellExpand';
 import CustomTable from '@/components/customTable'
 import CustomPagination from '@/components/customPagination'
 import HistoryDataDialog from './components/historyDataDialog';
-import CurrentPositonDialog from './components/currentPositonDialog'
+// import CurrentPositonDialog from './components/currentPositonDialog'
 import {userStatusFilter} from '@/filters';
-import {coverDateString, message, randomFactoryLocation, randomCoordinate} from '@/utils';
-import {getUserTraffic, postUsrTrafficPositon} from '@/services'
+import {coverDateString} from '@/utils';
+import {getUserTraffic} from '@/services'
+import PermissionButton from "@/components/permissionButton/index.jsx";
 
-const PeopleTraffic = () => {
+//  这里要根据飞手，查找一下飞手的所有的执飞记录，用dialog弹出
+const Pilot = () => {
   const { USER_STATUS_OPTIONS, renderUserStatus } = userStatusFilter()
   const getColumn = [
     { headerName: '人员姓名', field: 'nickname', flex: 1, minWidth: 150 },
@@ -43,7 +45,6 @@ const PeopleTraffic = () => {
       minWidth: 200,
       renderCell: (params) => {
         return <Box>
-          <Button onClick={onAction(params.row, 'position')}>一键定位</Button>
           <Button onClick={onAction(params.row, 'history')}>历史轨迹</Button>
         </Box>
       }
@@ -89,29 +90,6 @@ const PeopleTraffic = () => {
     }
   }
 
-  //  一键定位  postUsrTrafficPositon
-  const [locationText, setLocationText] = useState('')
-  const onPosition = (row) => {
-    const { lat, lng } = randomCoordinate()
-    const params = {
-      user_id: row.user_id,
-      longitude: lng,
-      latitude: lat,
-      location_text: randomFactoryLocation(),
-    }
-    postUsrTrafficPositon(params).then((res) => {
-      if (res.code === 0) {
-        setLocationText(res.data.location)
-        message.success('定位成功')
-        setOpenCurrentPositionDialog(true)
-      } else {
-        message.error(res.message)
-      }
-    }).catch((err) => {
-      message.error('定位失败')
-    })
-  }
-
   //关闭窗口
   const onClose = (type) => {
     switch (type) {
@@ -127,7 +105,10 @@ const PeopleTraffic = () => {
 
   return (
       <Box>
-        <Box sx={{ height: 'calc(100vh - 150px)' }}>
+        <PermissionButton module="people" page="pilot" action="create" onClick={() => onAction(params.row, 'add')}>
+          添加飞手
+        </PermissionButton>
+        <Box sx={{ height: 'calc(100vh - 250px)', mt: 2 }}>
           <CustomTable
               tableData={tableData}
               column={getColumn}
@@ -152,13 +133,13 @@ const PeopleTraffic = () => {
         />
 
         {/* 当前位置  */}
-        <CurrentPositonDialog
-            open={openCurrentPositionDialog}
-            data={record}
-            location={locationText}
-            onClose={() => onClose('location')}
-        />
+        {/*<CurrentPositonDialog*/}
+        {/*    open={openCurrentPositionDialog}*/}
+        {/*    data={record}*/}
+        {/*    location={locationText}*/}
+        {/*    onClose={() => onClose('location')}*/}
+        {/*/>*/}
       </Box>
   )
 }
-export default PeopleTraffic
+export default Pilot

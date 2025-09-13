@@ -4,33 +4,23 @@ import { zhCN } from '@mui/material/locale';
 import { zhCN as dataGridZhCN } from '@mui/x-data-grid/locales';
 import { zhCN as dateZhCN } from '@mui/x-date-pickers/locales';
 
-
 const themes = {
-  dark: {
-    mode: 'dark',
-    primary: {
-      main: '#1b2635',
-      // paper: '#233044',
-    },
-    background: {
-      paper: '#233044',
-    }
-  },
   light: {
     mode: 'light',
     primary: {
       main: '#fff',
-      // paper: '#fff',
+      paper: '#333',
     },
   },
   blue: {
     mode: 'light',
     primary: {
       main: '#376fd0',
-      // paper: '#376fd0',
+      paper: '#fff',
     },
   },
 }
+
 export const getMuiTheme = (mode = 'light') => {
   return createTheme({
     cssVariables: true,
@@ -45,6 +35,9 @@ export const getMuiTheme = (mode = 'light') => {
         }
       },
       MuiIconButton: {
+        defaultProps: {
+          disableRipple: true,
+        },
         styleOverrides: {
           root: {
             "&:hover": {
@@ -113,8 +106,6 @@ export const getMuiTheme = (mode = 'light') => {
             textDecoration: 'underline'
           },
           containedPrimary: {
-            // backgroundColor: 'var(--custom-palette-primary-color)',
-            // color: 'var(--custom-palette-color-2)',
             "&:hover": {
               backgroundColor: 'var(--custom-palette-background-paper)',
             },
@@ -132,24 +123,15 @@ export const getMuiTheme = (mode = 'light') => {
       MuiOutlinedInput: {
         styleOverrides: {
           root: {
-            // "&:hover .MuiOutlinedInput-notchedOutline": {
-            //   borderColor: "#4caf50",
-            // },
             "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
               borderColor: "var(--custom-input-border-color)",
-              // borderWidth: "2px",
             },
           },
           input: {
             '&:-webkit-autofill': {
-              //  aliceblue
-              // WebkitBoxShadow: 'aliceblue',
               WebkitBoxShadow: '0 0 0 100px transparent inset',
               WebkitTextFillColor: 'var(--custom-palette-typography)',
               caretColor: 'var(--custom-palette-typography)',
-            },
-            '&:-internal-autofill-selected': {
-              // backgroundColor: 'transparent',
             },
           },
         }

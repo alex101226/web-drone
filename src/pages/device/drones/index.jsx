@@ -9,6 +9,7 @@ import SaveCarDrawer from './components/saveCarDrawer'
 import DetailsDrawer from './components/deletesDrawer'
 import { getVehicle } from '@/services'
 import { useUserStore } from '@/store'
+import PermissionButton from "@/components/permissionButton/index.jsx";
 
 
 const CarRegister = () => {
@@ -22,7 +23,7 @@ const CarRegister = () => {
   const getColumn = () => {
     const columns = [
       {
-        headerName: '车辆照片',
+        headerName: '无人机照片',
         field: 'vehicle_photo',
         flex: 1,
         minWidth: 80,
@@ -155,12 +156,12 @@ const CarRegister = () => {
   }
 
   return (
-    <Box sx={{ width: '100%' }}>
-      { isRoot() && <Button variant="contained" sx={{mb: 2}} onClick={onEdit('add', null)}>
-        添加车辆
-      </Button>}
+    <Box>
+      <PermissionButton module="device" page="drones" action="create" onClick={() => onEdit('add', null)}>
+        添加无人机
+      </PermissionButton>
 
-      <Box sx={{ height: 'calc(100vh) - 250px' }}>
+      <Box sx={{ height: 'calc(100vh) - 250px', mt: 2 }}>
         <CustomTable
             tableData={data}
             column={getColumn()}

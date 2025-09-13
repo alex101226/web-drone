@@ -2,11 +2,11 @@ import {useState, useEffect} from 'react';
 import {Box, Button, Typography} from '@mui/material'
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import { transportStatusFilter } from '@/filters';
-import CustomTable from "@/components/customTable/index.js";
+import CustomTable from "@/components/customTable";
+import PermissionButton from "@/components/permissionButton";
 import DetailsDrawer from './components/detailsDrawer'
 import LogisticsStepDrawer from './components/logisticsStepDrawer'
 import {getTransport} from '@/services'
-import { genAllLogistics } from '../mock'
 
 const CarTraffic = () => {
   const [tableData, setTableData] = useState([]);
@@ -15,8 +15,6 @@ const CarTraffic = () => {
     getTransport().then(({ data, code }) => {
       if (code === 0) {
         const vehicleList = data.data ? data.data : []
-        const newData = genAllLogistics(vehicleList)
-        setTableData(newData)
       }
     })
   }
@@ -113,9 +111,17 @@ const CarTraffic = () => {
     }
     setOpenLogistics(!!row)
   }
+
+  //  添加机巢
+  const handleAction = (type) => {
+    console.log(type)
+  }
   return (
       <Box>
-        <Box sx={{ height: 'calc(100vh - 120px)' }}>
+        <PermissionButton module="device" page="nest" action="create" onClick={() => handleAction('add')}>
+          添加机巢
+        </PermissionButton>
+        <Box sx={{ height: 'calc(100vh - 250px)', mt: 2 }}>
           <CustomTable
               column={getColumn}
               tableData={tableData}

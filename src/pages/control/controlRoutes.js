@@ -9,7 +9,6 @@ export const controlRoutes = [
       hideSide: false,
       title: 'AI智巡管理',
       icon: <DriveEtaOutlinedIcon />,
-      role: ['admin', 'root']
     },
     children: [
       {
@@ -19,7 +18,6 @@ export const controlRoutes = [
           hideSide: false,
           title: '路线管理',
           // icon: <AddRoadOutlinedIcon />,
-          role: ['admin', 'root']
         }
       },
       {
@@ -29,7 +27,6 @@ export const controlRoutes = [
           hideSide: false,
           title: '智能调度',
           // icon: <EditCalendarOutlinedIcon />,
-          role: ['admin', 'root']
         }
       },
     ]

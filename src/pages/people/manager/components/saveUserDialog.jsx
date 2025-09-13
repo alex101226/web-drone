@@ -14,7 +14,7 @@ import {
   Box, OutlinedInput, styled
 } from "@mui/material";
 import {userStatusFilter} from '@/filters'
-import {updateUser, addUser} from '@/services';
+import {updateUser, addUser, getRoles} from '@/services';
 import { message } from '@/utils'
 
 const initialState = {
@@ -44,10 +44,22 @@ const SaveUserDialog = (props) => {
     defaultValues: initialState
   });
 
+  //  获取角色列表
+  const [roleOptions, setRoleOptions] = useState([]);
+  const fetchRoles = () => {
+    getRoles().then((res) => {
+      if (res.code === 0) {
+        setRoleOptions(res.data)
+      }
+    })
+  }
   //  初始化赋值
   useEffect(() => {
-    if (data && open) {
-      reset({...data});
+    if (open) {
+      fetchRoles()
+      if (data) {
+        reset({...data});
+      }
     }
   }, [open])
 
@@ -150,32 +162,6 @@ const SaveUserDialog = (props) => {
             </FormControl>
           </Fragment>
       }
-      <Controller
-          name="status"
-          control={control}
-          rules={{ required: '请选择状态' }}
-          render={({ field, fieldState }) => (
-              <FormControl fullWidth error={!!fieldState.error} margin="normal">
-                <InputLabel id="status-input">状态</InputLabel>
-                <Select
-                    labelId="status-input"
-                    label="状态"
-                    aria-describedby="status-helper-text"
-                    disabled={isAdd()}
-                    {...field}
-                >
-                  {(USER_STATUS_OPTIONS || []).map((status, index) => (
-                      <MenuItem value={status} key={index}>
-                        {renderUserStatus(status)}
-                      </MenuItem>
-                  ))}
-                </Select>
-                <InputHelp id="status-helper-text">
-                  {fieldState.error?.message}
-                </InputHelp>
-              </FormControl>
-          )}
-      />
       <FormControl fullWidth error={!!errors.nickname} margin="normal">
         <InputLabel htmlFor="nickname-input">用户昵称</InputLabel>
         <OutlinedInput
@@ -218,20 +204,57 @@ const SaveUserDialog = (props) => {
           {errors.position?.message}
         </InputHelp>
       </FormControl>
-      <FormControl fullWidth error={!!errors.office_location} margin="normal">
-        <InputLabel htmlFor="office_location-input">工作位置</InputLabel>
-        <OutlinedInput
-            id="office_location-input"
-            aria-describedby="office_location-helper-text"
-            label="工作位置"
-            {...register('office_location', {
-              required: '请输入工作位置',
-            })}
-        />
-        <InputHelp id="office_location-helper-text">
-          {errors.office_location?.message}
-        </InputHelp>
-      </FormControl>
+      <Controller
+          name="status"
+          control={control}
+          rules={{ required: '请选择状态' }}
+          render={({ field, fieldState }) => (
+              <FormControl fullWidth error={!!fieldState.error} margin="normal">
+                <InputLabel id="status-input">状态</InputLabel>
+                <Select
+                    labelId="status-input"
+                    label="状态"
+                    aria-describedby="status-helper-text"
+                    disabled={isAdd()}
+                    {...field}
+                >
+                  {(USER_STATUS_OPTIONS || []).map((status, index) => (
+                      <MenuItem value={status} key={index}>
+                        {renderUserStatus(status)}
+                      </MenuItem>
+                  ))}
+                </Select>
+                <InputHelp id="status-helper-text">
+                  {fieldState.error?.message}
+                </InputHelp>
+              </FormControl>
+          )}
+      />
+      <Controller
+          name="role_id"
+          control={control}
+          rules={{ required: '请选择角色' }}
+          render={({ field, fieldState }) => (
+              <FormControl fullWidth error={!!fieldState.error} margin="normal">
+                <InputLabel id="role_id-input">角色</InputLabel>
+                <Select
+                    labelId="role_id-input"
+                    label="角色"
+                    aria-describedby="role_id-helper-text"
+                    {...field}
+                >
+                  {roleOptions.map((role, index) => (
+                      <MenuItem value={role.id} key={index}>
+                        {role.role_description}
+                      </MenuItem>
+                  ))}
+                </Select>
+                <InputHelp id="role_id-helper-text">
+                  {fieldState.error?.message}
+                </InputHelp>
+              </FormControl>
+          )}
+      />
     </Box>
   }
   return (

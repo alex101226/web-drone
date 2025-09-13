@@ -1,6 +1,6 @@
 import {Drawer as MuiDrawer, List, Toolbar, styled} from '@mui/material';
-import { useSidebar } from '@/store';
-import SystemLogo from "@/layout/components/systemLogo";
+import { useSidebar } from '@/store/index.js';
+import SystemLogo from "@/layout/components/systemLogo.jsx";
 
 const openedMixin = (theme) => ({
   width: 240,

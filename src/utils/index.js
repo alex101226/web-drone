@@ -2,6 +2,7 @@ import {formatDate, coverDateString, srcset, coverDateObj} from './format'
 import { http } from './fetch'
 import { message } from './message'
 import { transNumber } from './trans'
+import { rolePermissions } from './permissionConfig'
 import {
   randomDate, randomLocation, randomStatus, randomRemark,
   randomFactoryLocation, dateRange, randomName, randomCoordinate,
@@ -27,4 +28,5 @@ export {
   getUsageRate,
   dateRange,
   transNumber,
+  rolePermissions,
 }

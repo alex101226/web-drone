@@ -1,36 +1,24 @@
 import {useState, useEffect} from 'react';
-import {Box, Button} from '@mui/material'
-import CheckInfo from '@/components/checkInfo'
+import {Box} from '@mui/material'
 import CustomTable from '@/components/customTable'
 import CustomPagination from '@/components/customPagination'
+import PermissionButton from '@/components/permissionButton'
 import { renderCellExpand } from '@/components/CustomCellExpand'
-import SaveUserDialog from '@/pages/dashboard/hashrateUserManage/components/saveUserDialog'
+import SaveUserDialog from './components/saveUserDialog'
 import {getHashrateUser} from '@/services';
 import {userStatusFilter} from '@/filters';
 import { coverDateString } from '@/utils'
-import { useUserStore } from '@/store'
 
 const PeoplePosition = () => {
-  const { userInfo } = useUserStore()
 
-  const isRoot = () => {
-    return userInfo?.role_name === 'root'
-  }
   const {USER_STATUS_OPTIONS, renderUserStatus} = userStatusFilter()
   //  昵称，账户，部门，职位，管理员角色，账号状态，修改
   const getColumn = () => {
-    const columns = [
+    return [
       { headerName: '昵称', field: 'nickname', flex: 1, minWidth: 150 },
-      {headerName: '账户', field: 'username', flex: 1, minWidth: 150 },
-      {headerName: '部门', field: 'department', flex: 1, minWidth: 150 },
-      {headerName: '职位', field: 'position', flex: 1, minWidth: 150 },
-      {
-        headerName: '办公位置',
-        field: 'office_location',
-        flex: 1,
-        minWidth: 150,
-        renderCell: renderCellExpand,
-      },
+      {headerName: '账户', field: 'username', flex: 1, minWidth: 150, renderCell: renderCellExpand },
+      {headerName: '部门', field: 'department', flex: 1, minWidth: 150, renderCell: renderCellExpand },
+      {headerName: '职位', field: 'position', flex: 1, minWidth: 150, renderCell: renderCellExpand },
       {
         headerName: '账号状态',
         field: 'status',
@@ -40,24 +28,28 @@ const PeoplePosition = () => {
         renderCell: (params) => renderUserStatus(params.value),
       },
       {
+        headerName: '角色',
+        field: 'role_description',
+        flex: 1,
+        minWidth: 150,
+        renderCell: renderCellExpand
+      },
+      {
         headerName: '创建时间',
         field: 'created_at',
         flex: 1,
         minWidth: 180,
         renderCell: (params) => coverDateString(params.value, '4'),
-      },]
-    if (!isRoot()) {
-      return columns
-    }
-    return [
-        ...columns,
+      },
       {
         headerName: '',
         field: 'action',
         minWidth: 150,
         flex: 1,
         renderCell: (params) => {
-          return <Button onClick={onEdit(params.row)}>修改</Button>
+          return <PermissionButton module="people" page="manager" action="update" type="text" onClick={onEdit(params.row)}>
+            修改
+          </PermissionButton>
         }
       },
     ]
@@ -119,9 +111,10 @@ const PeoplePosition = () => {
 
   return (
       <Box>
-        { isRoot() &&  <Button variant="contained" sx={{mb: 2}} onClick={onEdit(null)}>添加人员</Button>}
-
-        <Box sx={{ height: 'calc(100vh - 250px)' }}>
+        <PermissionButton module="people" page="manager" action="create" onClick={onEdit(null)}>
+          创建用户
+        </PermissionButton>
+        <Box sx={{ height: 'calc(100vh - 250px)', mt: 2 }}>
           <CustomTable
               tableData={data}
               column={getColumn()}

@@ -1,14 +1,13 @@
 import React from 'react';
 import { Outlet, useLocation } from 'react-router';
 import {Box, Stack, Toolbar} from '@mui/material'
-import Header from './components/header'
-import Sidebar from './components/sidebar';
+import Header from './header.jsx'
+import Sidebar from './sidebar.jsx';
 import SidebarItem from './components/sidebarItem';
 import CustomServiceDrawer from "@/components/customServiceDrawer";
 import {useServiceDrawer} from '@/store';
 import serviceImage from "@/assets/images/service.png";
 import routes from '@/routes'
-
 
 const Layout = () => {
   const getMenuList = () => {
@@ -31,7 +30,6 @@ const Layout = () => {
         />
     )
   }
-
   return (
     <Box sx={{
       minHeight: '100vh',
@@ -56,8 +54,8 @@ const Layout = () => {
         </Box>
       </Stack>
 
-      {showButton() && renderFixedButton()}
-      <CustomServiceDrawer />
+      {/*{showButton() && renderFixedButton()}*/}
+      {/*<CustomServiceDrawer />*/}
     </Box>
   )
 }
