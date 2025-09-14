@@ -62,7 +62,7 @@ const ThemeButton = () => {
   const { theme, setTheme } = useThemeStore();
   const toggleTheme = (event) => {
     const checked = event.target.checked;
-    setTheme(checked ? 'blue' : 'white');
+    setTheme(checked ? 'blue' : 'light');
   }
 
   return <MaterialUISwitch checked={theme === 'blue'} onChange={ toggleTheme } />

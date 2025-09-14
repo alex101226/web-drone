@@ -138,12 +138,17 @@ export const getCurrentTransport = async (params) => {
   return await http.get(`/getCurrentTransport?route_id=${params.route_id}`)
 }
 
-//  电子围栏查询
-export const getFences = async ({page, pageSize}) => {
-  return await http.get(`/getFences?page=${page}&pageSize=${pageSize}`)
+//  机巢查询
+export const getNests = async ({page, pageSize}) => {
+  return await http.get(`/getNests?page=${page}&pageSize=${pageSize}`)
 }
 
-//  电子围栏添加
-export const addFence = async (data) => {
-  return await http.post('/addFence', data)
+//  机巢添加
+export const addNest = async (data) => {
+  return await http.post('/addNest', data)
+}
+
+//  机巢修改  updateNest
+export const updateNest = async (data) => {
+  return await http.post('/updateNest', data)
 }

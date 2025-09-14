@@ -21,7 +21,7 @@ const CarRegister = () => {
 
   const {CAR_STATUS_OPTIONS, renderCarStatus} = carStatusFilter()
   const getColumn = () => {
-    const columns = [
+    return [
       {
         headerName: '无人机照片',
         field: 'vehicle_photo',
@@ -44,35 +44,29 @@ const CarRegister = () => {
           />
         }
       },
-      { headerName: '车辆名称', field: 'vehicle_alias', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
+      { headerName: '编号', field: 'vehicle_alias', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
       // { headerName: '车辆品牌', field: 'brand', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
       // { headerName: '系列号', field: 'series_number', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
       // { headerName: 'VIN码', field: 'vin_code', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      { headerName: '里程数/KG', field: 'mileage', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
+      { headerName: '型号', field: 'mileage', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
       { headerName: '燃油类型', field: 'fuel_type', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      // { headerName: '发动机号', field: 'engine_number', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      // {
-      //   headerName: '车辆位置',
-      //   field: 'location',
-      //   renderCell: renderCellExpand,
-      //   flex: 1, minWidth: 150,
-      // },
-      { headerName: '所属部门', field: 'department', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
+      { headerName: '硬件参数', field: 'engine_number', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
+      {
+        headerName: '车辆位置',
+        field: 'location',
+        renderCell: renderCellExpand,
+        flex: 1, minWidth: 150,
+      },
+      { headerName: '所属机巢', field: 'department', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
       { headerName: '负责人', field: 'operator_nickname', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
       {
-        headerName: '车辆状态',
+        headerName: '状态',
         field: 'status',
         flex: 1, minWidth: 150,
         renderCell: (params) => renderCarStatus(params.value.toString()),
         valueOptions: CAR_STATUS_OPTIONS,
       },
       { headerName: '备注信息', field: 'remark', flex: 1, minWidth: 150, renderCell: renderCellExpand, },
-    ]
-    if (!isRoot()) {
-      return columns
-    }
-    return [
-      ...columns,
       {
         headerName: '操作',
         field: 'action',
@@ -89,6 +83,7 @@ const CarRegister = () => {
         }
       },
     ]
+
   }
 
   //  获取车辆信息

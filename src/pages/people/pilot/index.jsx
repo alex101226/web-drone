@@ -4,7 +4,6 @@ import {renderCellExpand} from '@/components/CustomCellExpand';
 import CustomTable from '@/components/customTable'
 import CustomPagination from '@/components/customPagination'
 import HistoryDataDialog from './components/historyDataDialog';
-// import CurrentPositonDialog from './components/currentPositonDialog'
 import {userStatusFilter} from '@/filters';
 import {coverDateString} from '@/utils';
 import {getUserTraffic} from '@/services'
