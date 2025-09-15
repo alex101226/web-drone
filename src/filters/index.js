@@ -1,5 +1,5 @@
 import { renderRadiusContained, renderCircleContained } from './contained';
-import { userStatusFilter } from './userStatusFilter'
+import { userStatusFilter, operatorStatusFilter } from './userStatusFilter'
 import { hashRateFilter } from './hashRateFilter'
 import { deviceStatusFilter } from './deviceStatusFilter'
 import { renderEmptyFilter } from './emptyFilter'
@@ -18,5 +18,6 @@ export {
   deviceStatusFilter,
   renderEmptyFilter,
   dispatchStatusFilter,
-  carDispatchStatusFilter
+  carDispatchStatusFilter,
+  operatorStatusFilter
 }

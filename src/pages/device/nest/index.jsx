@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {Box, Typography} from '@mui/material'
 import { renderCellExpand } from '@/components/CustomCellExpand'
-import { transportStatusFilter } from '@/filters';
+import { deviceStatusFilter } from '@/filters';
 import CustomTable from "@/components/customTable";
 import PermissionButton from "@/components/permissionButton";
 import CustomPagination from '@/components/customPagination'
@@ -35,10 +35,10 @@ const Nest = () => {
   const savePage = (page) => {
     setPage(page)
   }
-  // const { TRANSPORT_STATUS_OPTIONS, renderTransportStatus } = transportStatusFilter()
+  const { NEST_STATUS_OPTIONS, renderNestStatus } = deviceStatusFilter()
   const getColumn = [
     {
-      headerName: '序号',
+      headerName: 'ID',
       field: 'id',
       renderCell: renderCellExpand,
       flex: 1, minWidth: 80,
@@ -54,18 +54,22 @@ const Nest = () => {
       field: 'position',
       flex: 1, minWidth: 150,
       renderCell: ({ row }) => {
-        return row.longitude + row.latitude
+        return `${row.longitude}, ${row.latitude}`
       }
     },
     {
-      headerName: '无人机数量上限',
+      headerName: '无人机数量上限（个）',
       field: 'capacity',
       flex: 1, minWidth: 100,
     },
     {
       headerName: '状态',
-      field: 'status',
+      field: 'status_label',
       flex: 1, minWidth: 100,
+      valueOptions: NEST_STATUS_OPTIONS,
+      renderCell: ({value, row}) => {
+        return renderNestStatus(row.status, value)
+      }
     },
     {
       headerName: '操作',

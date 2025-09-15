@@ -1,41 +1,57 @@
 import {useState, useEffect} from 'react';
-import {Box, Button} from '@mui/material';
+import {Box} from '@mui/material';
 import {renderCellExpand} from '@/components/CustomCellExpand';
 import CustomTable from '@/components/customTable'
 import CustomPagination from '@/components/customPagination'
-import HistoryDataDialog from './components/historyDataDialog';
-import {userStatusFilter} from '@/filters';
-import {coverDateString} from '@/utils';
-import {getUserTraffic} from '@/services'
-import PermissionButton from "@/components/permissionButton/index.jsx";
+import PermissionButton from '@/components/permissionButton';
+import SaveDialog from './components/saveDialog.jsx';
+import {operatorStatusFilter} from '@/filters';
+import {getOperators} from '@/services'
+import CustomImage from "@/components/customImage/index.js";
 
+const PAGE_SIZE = 10
 //  这里要根据飞手，查找一下飞手的所有的执飞记录，用dialog弹出
 const Pilot = () => {
-  const { USER_STATUS_OPTIONS, renderUserStatus } = userStatusFilter()
+  const { OPERATOR_STATUS_OPTIONS, renderOperatorStatus } = operatorStatusFilter()
   const getColumn = [
-    { headerName: '人员姓名', field: 'nickname', flex: 1, minWidth: 150 },
+    { headerName: '飞手姓名', field: 'operator_name', flex: 1, minWidth: 150, renderCell: renderCellExpand, },
     {
-      headerName: '工作岗位',
-      field: 'office_location',
+      headerName: '联系电话',
+      field: 'phone',
       flex: 1,
       minWidth: 150,
       renderCell: renderCellExpand,
     },
-    {headerName: '当前位置', field: 'location_text', flex: 1,},
+    {headerName: '飞行执照', field: 'license_no', flex: 1,},
     {
-      headerName: '账号状态',
-      field: 'status',
+      headerName: '执照照片',
+      field: 'license_photo',
       flex: 1,
       minWidth: 150,
-      options: USER_STATUS_OPTIONS,
-      renderCell: (params) => renderUserStatus(params.value),
+      renderCell: (params) => {
+        return params.value ? <CustomImage
+            w={60}
+            h={60}
+            fit="cover"
+            mt="calc((80px - 60px) / 2)"
+            radius={1}
+            img={globalThis.CONSTANTS.STATIC_URL + params.value}
+        /> : <Box sx={{
+          width: 60,
+          height: 60,
+          borderRadius: 1,
+          backgroundColor: '#ccc',
+          mt: 'calc((80px - 60px) / 2)' }}
+        />
+      }
     },
     {
-      headerName: '定位时间',
-      field: 'location_time',
+      headerName: '账号状态',
+      field: 'status_label',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => params.value ? coverDateString(params.value, '4') : '--',
+      options: OPERATOR_STATUS_OPTIONS,
+      renderCell: (params) => renderOperatorStatus(params.row, params.value),
     },
     {
       headerName: '',
@@ -44,7 +60,14 @@ const Pilot = () => {
       minWidth: 200,
       renderCell: (params) => {
         return <Box>
-          <Button onClick={onAction(params.row, 'history')}>历史轨迹</Button>
+          <PermissionButton
+              module="people"
+              page="pilot"
+              action="update"
+              type="text"
+              onClick={() => onAction(params.row, 'update')}>
+            修改
+          </PermissionButton>
         </Box>
       }
     },
@@ -54,12 +77,12 @@ const Pilot = () => {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
-  const fetchUserTraffic = (p = 1) => {
+  const fetchOperator = (p = 1) => {
     const params = {
       page: p,
-      pageSize: 10,
+      pageSize: PAGE_SIZE,
     }
-    getUserTraffic(params).then((res) => {
+    getOperators(params).then((res) => {
       if (res.code === 0) {
         setTableData(res.data.data)
         setTotal(res.data.total)
@@ -70,74 +93,61 @@ const Pilot = () => {
   }
 
   useEffect(() => {
-    fetchUserTraffic()
+    fetchOperator()
   }, [])
 
   const savePage = (page) => {
     setPage(page)
+    fetchOperator(page)
   }
 
-  const [record, setRecord] = useState({});
-  const [openHistoryDataDialog, setOpenHistoryDataDialog] = useState(false)
-  const [openCurrentPositionDialog, setOpenCurrentPositionDialog] = useState(false)
-  const onAction = (row, type) => () => {
+  const [type, setType] = useState('add')
+  const [record, setRecord] = useState(null);
+  const [openSaveDialog, setOpenSaveDialog] = useState(false)
+  const onAction = (row, type) => {
+    setType(type)
     setRecord(row)
-    if (type === 'history') {
-      setOpenHistoryDataDialog(true)
-    } else {
-      onPosition(row)
-    }
+    setOpenSaveDialog(true)
   }
 
   //关闭窗口
-  const onClose = (type) => {
-    switch (type) {
-      case 'history':
-        setOpenHistoryDataDialog(false)
-        break
-      case 'location':
-        setOpenCurrentPositionDialog(false)
-        fetchUserTraffic(page)
-        break;
+  const onClose = (flag) => {
+    if (flag) {
+      fetchOperator(page)
     }
+    setOpenSaveDialog(false)
   }
 
   return (
       <Box>
-        <PermissionButton module="people" page="pilot" action="create" onClick={() => onAction(params.row, 'add')}>
+        <PermissionButton module="people" page="pilot" action="create" onClick={() => onAction(null, 'add')}>
           添加飞手
         </PermissionButton>
         <Box sx={{ height: 'calc(100vh - 250px)', mt: 2 }}>
           <CustomTable
               tableData={tableData}
               column={getColumn}
-              rowKeyProp="user_id"
+              rowKeyProp="id"
               hideFooter
+              rowHeight={80}
           />
         </Box>
         <CustomPagination
             total={total}
-            pageSize={5}
+            pageSize={PAGE_SIZE}
             page={page}
             totalPage={totalPages}
             savePage={savePage}
         />
 
 
-        {/* 历史轨迹  */}
-        <HistoryDataDialog
-            open={openHistoryDataDialog}
+        {/* 设置飞手信息  */}
+        <SaveDialog
+            open={openSaveDialog}
             data={record}
-            onClose={() => onClose('history')}
+            type={type}
+            onClose={onClose}
         />
-
-        {/* 当前位置  */}
-        {/*<CurrentPositonDialog*/}
-        {/*    open={openCurrentPositionDialog}*/}
-        {/*    data={record}*/}
-        {/*    location={locationText}*/}
-        {/*    onClose={() => onClose('location')}*/}
-        {/*/>*/}
       </Box>
   )
 }

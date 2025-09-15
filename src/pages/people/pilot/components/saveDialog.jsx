@@ -1,12 +1,12 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState, useEffect} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
-  Box, Stack, FormControl, FormHelperText, InputLabel, Button,
-  MenuItem, OutlinedInput, Select, styled
+  Box, Button, FormControl, FormHelperText, InputLabel,
+  MenuItem, OutlinedInput, Select, styled, Stack
 } from '@mui/material';
 import CustomDialog from '@/components/CustomDialog'
-import MapGL3D from '@/components/mapGL3D'
-import { addNest, updateNest, getDict } from '@/services'
+import CustomCardUpload from '@/components/customCardUpload'
+import {updateOperator, getDict, addOperator} from '@/services'
 import {message} from "@/utils";
 
 const InputHelp = styled(FormHelperText)({
@@ -14,15 +14,13 @@ const InputHelp = styled(FormHelperText)({
 })
 
 const initialState = {
-  nest_name: '',
-  capacity: '',
-  status: 1,
-  longitude: 116.404,
-  latitude: 39.915
+  operator_name: '',
+  phone: '',
+  status: '1',
+  license_no: '',
+  license_photo: ''
 }
-
-const SaveNestDialog = (props) => {
-
+const SaveDialog = (props) => {
   const { open, onClose, data, type } = props;
 
   const isAdd = () => type === 'add';
@@ -33,13 +31,17 @@ const SaveNestDialog = (props) => {
     control,
     reset,
     setValue,
+    watch,
   } = useForm({
-    defaultValues: initialState
+    defaultValues: initialState,
+    mode: 'onChange',
   });
+
+  const license_photo = watch('license_photo'); // 监听 vehicle_photo
 
   const [statusOptions, setStatusOptions] = useState([])
   const fetchDict = () => {
-    getDict({ type: 'nest_status' }).then((res) => {
+    getDict({ type: 'operator_status' }).then((res) => {
       if (res.code === 0) {
         setStatusOptions(res.data)
         const find = res.data.length > 0 ? res.data[0] : null
@@ -60,9 +62,16 @@ const SaveNestDialog = (props) => {
     }
   }, [open]);
 
+  //  照片上传
+  const onChangeUpload = (url) => {
+    setValue('license_photo', url, {
+      shouldValidate: false,  // 是否触发验证
+      shouldDirty: true,     // 是否标记为已修改
+    });
+  }
+
   //  关闭按钮
   const handleClose = (flag) => {
-    reset()
     onClose(flag)
   }
 
@@ -70,7 +79,7 @@ const SaveNestDialog = (props) => {
 
   //  添加执行
   const onAdd = (data) => {
-    addNest(data).then(res => {
+    addOperator(data).then(res => {
       if (res.code === 0) {
         handleClose(true)
         message.success('添加成功')
@@ -86,7 +95,7 @@ const SaveNestDialog = (props) => {
 
   //  修改执行
   const onUpdate = (data) => {
-    updateNest({ ...data, nest_id: 1 }).then(res => {
+    updateOperator({ ...data, operator_id: 1 }).then(res => {
       if (res.code === 0) {
         message.success(res.message)
         handleClose(true)
@@ -102,7 +111,7 @@ const SaveNestDialog = (props) => {
 
   //  提交按钮
   const onSubmit = (data) => {
-    if (type === 'add') {
+    if (isAdd()) {
       onAdd(data)
     } else {
       onUpdate(data)
@@ -124,45 +133,63 @@ const SaveNestDialog = (props) => {
   //  内容
   const renderContent = () => {
     return <Box component="form">
-      <FormControl fullWidth error={!!errors.nest_name} margin="normal">
-        <InputLabel htmlFor="nest_name">机巢名称</InputLabel>
+      <FormControl fullWidth error={!!errors.operator_name} margin="normal">
+        <InputLabel htmlFor="operator_name">操控员姓名</InputLabel>
         <OutlinedInput
-            label="机巢名称"
-            id="nest_name"
-            aria-describedby="nest_name-helper-text"
-            {...register("nest_name", {
-              required: '请输入机巢名称',
+            label="操控员姓名"
+            id="operator_name"
+            aria-describedby="operator_name-helper-text"
+            {...register("operator_name", {
+              required: '请输入操控员姓名',
             })}
         />
-        <InputHelp id="nest_name-helper-text">
-          {errors.nest_name?.message}
+        <InputHelp id="operator_name-helper-text">
+          {errors.operator_name?.message}
         </InputHelp>
       </FormControl>
-      <FormControl fullWidth error={!!errors.capacity} margin="normal">
-        <InputLabel htmlFor="capacity">无人机限制数量</InputLabel>
+      <FormControl fullWidth error={!!errors.phone} margin="normal">
+        <InputLabel htmlFor="phone">联系电话</InputLabel>
         <OutlinedInput
-            {...register("capacity", {
-              required: '请输入无人机限制数量',
+            {...register("phone", {
+              required: '请输入联系电话',
+              pattern: {
+                value: /^1\d{10}$/,
+                message: '请输入有效的手机号'
+              }
             })}
-            label="无人机限制数量"
-            id="capacity"
-            aria-describedby="capacity-helper-text"
+            label="联系电话"
+            id="phone"
+            aria-describedby="phone-helper-text"
         />
-        <InputHelp id="capacity-helper-text">
-          {errors.capacity?.message}
+        <InputHelp id="phone-helper-text">
+          {errors.phone?.message}
+        </InputHelp>
+      </FormControl>
+      <FormControl fullWidth error={!!errors.license_no} margin="normal">
+        <InputLabel htmlFor="operator_name">飞行执照编号</InputLabel>
+        <OutlinedInput
+            label="飞行执照编号"
+            id="license_no"
+            aria-describedby="license_no-helper-text"
+            {...register("license_no", {
+              required: '请输入飞行执照编号',
+            })}
+        />
+        <InputHelp id="license_no-helper-text">
+          {errors.license_no?.message}
         </InputHelp>
       </FormControl>
       <Controller
           name="status"
           control={control}
-          rules={{ required: '请选择机巢状态' }}
+          rules={{ required: '请选择状态' }}
           render={({ field, fieldState }) => (
               <FormControl fullWidth error={!!fieldState.error} margin="normal">
-                <InputLabel id="status-label">机巢状态</InputLabel>
+                <InputLabel id="status-label">操作员状态</InputLabel>
                 <Select
                     labelId="status-label"
                     id="status"
-                    label="机巢状态"
+                    label="操作员状态"
                     disabled={isAdd()}
                     {...field}>
                   {
@@ -179,26 +206,23 @@ const SaveNestDialog = (props) => {
               </FormControl>
           )}
       />
-
-      <Box sx={{ height: '300px' }}>
-        <MapGL3D
-            center={{ lng: 116.404, lat: 39.915 }}
-            zoom={16}
-            tilt={60}
-            heading={45}
+      <FormControl error={!!errors.vehicle_photo} margin="normal">
+        <CustomCardUpload
+            name="operator"
+            preview={license_photo}
+            onChangeUpload={onChangeUpload}
         />
-      </Box>
+      </FormControl>
     </Box>;
   }
-
   return (
       <CustomDialog
           open={open}
           maxWidth="sm"
-          title={type === 'add' ? '添加机巢' : '修改机巢'}
+          title={ isAdd() ? '添加无人机操控员' : '修改无人机操控员'}
           content={renderContent()}
           actions={renderAction()}
       />
   )
 }
-export default SaveNestDialog;
+export default SaveDialog;

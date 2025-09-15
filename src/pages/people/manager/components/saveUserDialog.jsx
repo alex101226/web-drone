@@ -41,7 +41,8 @@ const SaveUserDialog = (props) => {
     control,
     reset,
   } = useForm({
-    defaultValues: initialState
+    defaultValues: initialState,
+    mode: 'onChange',
   });
 
   //  获取角色列表

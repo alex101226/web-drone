@@ -1,4 +1,4 @@
-import {Fragment} from 'react';
+import {Fragment, useEffect} from 'react';
 import {Box, Typography, styled, IconButton} from '@mui/material';
 import { Upload, Clear } from '@mui/icons-material';
 import { message, srcset } from '@/utils'
@@ -16,8 +16,11 @@ const VisuallyHiddenInput = styled('input')({
   width: 1,
 });
 const CustomCardUpload = (props) => {
-  const { onChangeUpload, preview } = props
+  const { onChangeUpload, preview, name } = props
 
+  useEffect(() => {
+    console.log('preview', preview)
+  }, [preview])
   //  上传执行
   const onUpload = (params) => {
     uploadFile(params).then(res => {
@@ -50,6 +53,7 @@ const CustomCardUpload = (props) => {
       if (e.target.result) {
         let formData = new FormData();
         formData.append('file', file);
+        formData.append('name', name);
         onUpload(formData)
       }
     };

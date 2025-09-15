@@ -1,5 +1,9 @@
 import { http } from '@/utils'
 
+//  字典  getDict
+export const getDict = async ({type}) => {
+  return await http.get(`/getDict?type=${type}`)
+}
 //  上传接口
 export const uploadFile = async (params) => {
   return await http.upload('/upload', params)
@@ -40,9 +44,19 @@ export const getUserInfo = async (params) => {
   return await http.get(`/getUserInfo?userId=${params.userId}`)
 }
 
-//  获取用户追踪数据
-export const getUserTraffic = async ({ page, pageSize }) => {
-  return await http.get(`/getUserTraffic?page=${page}&pageSize=${pageSize}`)
+//  获取操控员数据
+export const getOperators = async ({ page, pageSize }) => {
+  return await http.get(`/getOperators?page=${page}&pageSize=${pageSize}`)
+}
+
+//  添加操控员 addOperator
+export const addOperator = async (data) => {
+  return await http.post('/addOperator', data)
+}
+
+//  修改操控员 updateOperator
+export const updateOperator = async (data) => {
+  return await http.post('/updateOperator', data)
 }
 
 //  获取用户追踪----> 历史轨迹数据

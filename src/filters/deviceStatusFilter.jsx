@@ -1,85 +1,32 @@
-import { memo } from 'react';
-import ReportProblemIcon from '@mui/icons-material/ReportProblem';
-import InfoIcon from '@mui/icons-material/Info';
-import AutorenewIcon from '@mui/icons-material/Autorenew';
-import DoneIcon from '@mui/icons-material/Done';
-import { STATUS_OPTIONS, StyledChip } from './common'
+import { renderRadiusContained } from '@/filters';
 
 /**
- * 消防设备状态
+ * 机巢状态
  * @value status
- * @returns {{FIRE_STATUS_OPTIONS: string[], renderFireStatus: ((function(*): (string|*))|*)}}
- * 1: 正常，2: 故障，3: 维护， 4: 报警
+ * @returns {{NEST_STATUS_OPTIONS: string[], renderNestStatus: ((function(*): (string|*))|*)}}
+ * 1: 正常，2: 维护，3: 停用
  */
 export const deviceStatusFilter = () => {
-  const FIRE_STATUS_OPTIONS = STATUS_OPTIONS
+  const NEST_STATUS_OPTIONS = ['1', '2', '3']
 
-  //  当前状态：正常/故障/报警/维护
-  const statusText = (status) => {
+  //  颜色
+  const statusColor = (status) => {
     switch (status) {
-      case '1':
-        return '正常';
       case '2':
-        return '故障';
+        return '#4B70F5';
       case '3':
-        return '维护';
-      case '4':
-        return '报警';
+        return '#EB5B00';
       default:
-        return '正常'
+      case '1':
+        return '#1F7D53'
     }
   }
 
-  //  class
-  const statusClass = (status) => {
-    switch (status) {
-      case '1':
-        return 'Filled';
-      case '2':
-        return 'Rejected';
-      case '3':
-        return 'PartiallyFilled';
-      case '4':
-        return 'Open';
-      default:
-        return 'Filled'
-    }
-  }
-
-  const FireStatus = memo((props) => {
-    const { status } = props;
-
-    let icon = null;
-    if (status === '2') {
-      //  红色  异常
-      icon = <ReportProblemIcon className="icon" />;
-    } else if (status === '4') {
-      //  蓝色  待机
-      icon = <InfoIcon className="icon" />;
-    } else if (status === '3') {
-      //  橙色  检修
-      icon = <AutorenewIcon className="icon" />;
-    } else if (status === '1') {
-      //  绿色  正常
-      icon = <DoneIcon className="icon" />;
-    }
-
-    return (
-        <StyledChip
-            className={statusClass(status)}
-            icon={icon}
-            size="small"
-            label={statusText(status)}
-            variant="outlined"
-        />
-    );
-  });
-
-  const renderFireStatus = (value) => {
+  const renderNestStatus = (value, text) => {
     if (value == null) {
       return '';
     }
-    return <FireStatus status={value} />;
+    return renderRadiusContained(text)(statusColor(value))()
   }
-  return { FIRE_STATUS_OPTIONS, renderFireStatus }
+  return { NEST_STATUS_OPTIONS, renderNestStatus }
 }
