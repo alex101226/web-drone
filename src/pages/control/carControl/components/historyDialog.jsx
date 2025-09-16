@@ -81,26 +81,26 @@ const ControlHistoryDialog = (props) => {
   const [total, setTotal] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
   const [tableData, setTableData] = useState([]);
-  const fetchHistory = (p = 1) => {
-    const params = {
-      page: p,
-      pageSize: PAGE_SIZE,
-      vehicle_id: data.id,
-    }
-    getVehicleControlHistory(params).then(({ data, code }) => {
-      if (code === 0) {
-        setTotalPage(data.totalPages)
-        setTotal(data.total)
-        setTableData(data.data)
-      }
-    })
-  }
-
-  useEffect(() => {
-    if (open) {
-      fetchHistory()
-    }
-  }, [open])
+  // const fetchHistory = (p = 1) => {
+  //   const params = {
+  //     page: p,
+  //     pageSize: PAGE_SIZE,
+  //     vehicle_id: data.id,
+  //   }
+  //   getVehicleControlHistory(params).then(({ data, code }) => {
+  //     if (code === 0) {
+  //       setTotalPage(data.totalPages)
+  //       setTotal(data.total)
+  //       setTableData(data.data)
+  //     }
+  //   })
+  // }
+  //
+  // useEffect(() => {
+  //   if (open) {
+  //     fetchHistory()
+  //   }
+  // }, [open])
   //  分页
   const savePage = (page) => {
     setPage(page)

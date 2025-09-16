@@ -46,12 +46,12 @@ export const operatorStatusFilter = () => {
   //  颜色
   const statusColor = (status) => {
     switch (status) {
-      case '2':
+      case 2:
         return '#4B70F5';
-      case '3':
+      case 3:
         return '#EB5B00';
       default:
-      case '1':
+      case 1:
         return '#1F7D53'
     }
   }

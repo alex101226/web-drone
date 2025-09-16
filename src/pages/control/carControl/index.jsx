@@ -137,29 +137,28 @@ const CarControl = () => {
   const [total, setTotal] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
 
-  const fetchVehicleControl = (p = 1) => {
-    const params = {
-      page: p,
-      pageSize: PAGE_SIZE,
-      status: '1, 4'
-    }
-
-    getVehicleControl(params).then(({ data, code }) => {
-      if (code === 0) {
-        setTotalPage(data.totalPages)
-        setTotal(data.total)
-        const tableDataWithIndex = data.data.map((row, index) => ({
-          ...row,
-          __index: index,
-        }));
-        setTableData(tableDataWithIndex)
-      }
-    })
-  }
-
-  useEffect(() => {
-    fetchVehicleControl()
-  }, [])
+  // const fetchVehicleControl = (p = 1) => {
+  //   const params = {
+  //     page: p,
+  //     pageSize: PAGE_SIZE,
+  //     status: '1, 4'
+  //   }
+  //
+  //   getVehicleControl(params).then(({ data, code }) => {
+  //     if (code === 0) {
+  //       setTotalPage(data.totalPages)
+  //       setTotal(data.total)
+  //       const tableDataWithIndex = data.data.map((row, index) => ({
+  //         ...row,
+  //         __index: index,
+  //       }));
+  //       setTableData(tableDataWithIndex)
+  //     }
+  //   })
+  // }
+  // useEffect(() => {
+  //   fetchVehicleControl()
+  // }, [])
 
   //  分页
   const savePage = (page) => {
@@ -186,44 +185,44 @@ const CarControl = () => {
 
   //  一键调度
   const [loading1, setLoading1] = useState(false)
-  const onAllDispatch = () => {
-    const params = {
-      vehicle_ids: selectedVehicleIds
-    }
-    if (loading1) return false;
-    setLoading1(true)
-    postDispatchAllVehicles(params).then((res) => {
-      if (res.code === 0) {
-        fetchVehicleControl(page)
-      }
-      setErrorText(res.message)
-      setOpen(true)
-      setLoading1(false)
-    }).catch((err) => {
-      message.error('操作失败')
-      setLoading1(false)
-    })
-  }
+  // const onAllDispatch = () => {
+  //   const params = {
+  //     vehicle_ids: selectedVehicleIds
+  //   }
+  //   if (loading1) return false;
+  //   setLoading1(true)
+  //   postDispatchAllVehicles(params).then((res) => {
+  //     if (res.code === 0) {
+  //       fetchVehicleControl(page)
+  //     }
+  //     setErrorText(res.message)
+  //     setOpen(true)
+  //     setLoading1(false)
+  //   }).catch((err) => {
+  //     message.error('操作失败')
+  //     setLoading1(false)
+  //   })
+  // }
 
   //  单个车辆调度
   const [loading2, setLoading2] = useState(false)
-  const onDispatch = (id) => {
-    if (loading2) return false;
-    setLoading2(true)
-    postDispatchVehicle({ vehicle_id: id }).then((res) => {
-      if (res.code === 0) {
-        message.success('操作成功')
-        setSelectionModel(initialStateSelectionModel)
-        fetchVehicleControl(page)
-      } else {
-        message.error(res.message)
-      }
-      setLoading2(false)
-    }).catch((err) => {
-      message.error('操作失败')
-      setLoading2(false)
-    })
-  }
+  // const onDispatch = (id) => {
+  //   if (loading2) return false;
+  //   setLoading2(true)
+  //   postDispatchVehicle({ vehicle_id: id }).then((res) => {
+  //     if (res.code === 0) {
+  //       message.success('操作成功')
+  //       setSelectionModel(initialStateSelectionModel)
+  //       // fetchVehicleControl(page)
+  //     } else {
+  //       message.error(res.message)
+  //     }
+  //     setLoading2(false)
+  //   }).catch((err) => {
+  //     message.error('操作失败')
+  //     setLoading2(false)
+  //   })
+  // }
 
   //  调度历史记录
   const [openHistory, setOpenHistory] = useState(false)
@@ -232,10 +231,10 @@ const CarControl = () => {
   const handleControl = (row, type) => () => {
     switch (type) {
       case 'exclude':
-        onAllDispatch()
+        // onAllDispatch()
         break;
       case 'control':
-        onDispatch(row.id)
+        // onDispatch(row.id)
         break;
       case 'history':
         setRecord(row)

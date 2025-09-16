@@ -1,32 +1,24 @@
 import {useState, useEffect} from 'react';
 import {Box, Button} from '@mui/material'
-import {carStatusFilter} from '@/filters';
 import CustomTable from "@/components/customTable";
 import CustomPagination from '@/components/customPagination';
 import CustomImage from '@/components/customImage'
 import { renderCellExpand } from '@/components/CustomCellExpand'
-import SaveCarDrawer from './components/saveCarDrawer'
-import DetailsDrawer from './components/deletesDrawer'
-import { getVehicle } from '@/services'
-import { useUserStore } from '@/store'
-import PermissionButton from "@/components/permissionButton/index.jsx";
+import PermissionButton from "@/components/permissionButton";
+import SaveDroneDrawer from './components/saveDroneDrawer'
+import { getDrones } from '@/services'
+import {droneStatusFilter} from '@/filters';
 
-
+const PAGE_SIZE = 10
 const CarRegister = () => {
-  const { userInfo } = useUserStore()
-
-  const isRoot = () => {
-    return userInfo?.role_name === 'root'
-  }
-
-  const {CAR_STATUS_OPTIONS, renderCarStatus} = carStatusFilter()
+  const {DRONE_STATUS_OPTIONS, renderDroneStatus} = droneStatusFilter()
   const getColumn = () => {
     return [
       {
         headerName: '无人机照片',
-        field: 'vehicle_photo',
+        field: 'drone_photo',
         flex: 1,
-        minWidth: 80,
+        minWidth: 100,
         renderCell: (params) => {
           return params.value ? <CustomImage
               w={60}
@@ -44,46 +36,37 @@ const CarRegister = () => {
           />
         }
       },
-      { headerName: '编号', field: 'vehicle_alias', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      // { headerName: '车辆品牌', field: 'brand', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
-      // { headerName: '系列号', field: 'series_number', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      // { headerName: 'VIN码', field: 'vin_code', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      { headerName: '型号', field: 'mileage', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      { headerName: '燃油类型', field: 'fuel_type', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
-      { headerName: '硬件参数', field: 'engine_number', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
+      { headerName: '编号', field: 'drone_sn', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
+      { headerName: '型号', field: 'model', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
+      { headerName: '电池容量(mAh)', field: 'battery_capacity', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
+      { headerName: '载荷能力(kg)', field: 'payload_capacity', renderCell: renderCellExpand, flex: 1, minWidth: 150,},
       {
-        headerName: '车辆位置',
-        field: 'location',
+        headerName: '相机参数',
+        field: 'camera_label',
         renderCell: renderCellExpand,
         flex: 1, minWidth: 150,
       },
-      { headerName: '所属机巢', field: 'department', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
-      { headerName: '负责人', field: 'operator_nickname', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
+      { headerName: '飞手', field: 'operator_name', renderCell: renderCellExpand, flex: 1, minWidth: 150, },
       {
         headerName: '状态',
         field: 'status',
         flex: 1, minWidth: 150,
-        renderCell: (params) => renderCarStatus(params.value.toString()),
-        valueOptions: CAR_STATUS_OPTIONS,
+        renderCell: ({value, row}) => renderDroneStatus(value, row.status_label),
+        valueOptions: DRONE_STATUS_OPTIONS,
       },
-      { headerName: '备注信息', field: 'remark', flex: 1, minWidth: 150, renderCell: renderCellExpand, },
       {
         headerName: '操作',
         field: 'action',
         flex: 1, minWidth: 180,
         renderCell: (params) => {
           return <Box>
-            <Button onClick={onEdit('edit', params.row)}>
+            <Button onClick={() => onAction('edit', params.row)}>
               修改
-            </Button>
-            <Button onClick={() => handleOpenDetails(params.row)}>
-              查看详情
             </Button>
           </Box>
         }
       },
     ]
-
   }
 
   //  获取车辆信息
@@ -91,12 +74,12 @@ const CarRegister = () => {
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
-  const fetchVehicle =  (p = 1) => {
+  const fetchDrone =  (p = 1) => {
     const params = {
       page: p,
-      pageSize: 10,
+      pageSize: PAGE_SIZE,
     }
-    getVehicle(params).then((res) => {
+    getDrones(params).then((res) => {
       if (res.code === 0) {
         setTotal(res.data.total)
         setTotalPages(res.data.totalPages)
@@ -106,12 +89,12 @@ const CarRegister = () => {
   }
 
   useEffect(() => {
-    fetchVehicle()
+    fetchDrone()
   }, [])
 
   //  分页查看
   const savePage = (page) => {
-    fetchVehicle(page)
+    fetchDrone(page)
     setPage(page)
   }
 
@@ -119,7 +102,8 @@ const CarRegister = () => {
   const [saveOpen, setSaveOpen] = useState(false);
   const [record, setRecord] = useState(null);
   const [type, setType] = useState('add');
-  const onEdit = (type, row) => () => {
+  const onAction = (type, row) => {
+    console.log('检查问题', type)
     setRecord(row ? row : null)
     setType(type)
     setSaveOpen(true)
@@ -127,32 +111,15 @@ const CarRegister = () => {
 
   //  关闭活动窗口
   const onClose = (type, flag) => {
-    setRecord(null)
-    switch (type) {
-      case 'save':
-        setSaveOpen(false)
-          if (flag) {
-            fetchVehicle(page)
-          }
-        break;
+    if (flag) {
+      fetchDrone(page)
     }
-  }
-
-  //  查看详情
-  const [openDetails, setOpenDetails] = useState(false)
-  const handleOpenDetails = (row) => {
-    setRecord(row)
-    setOpenDetails(true)
-  }
-  //  关闭
-  const onDetailsClose = () => {
-    setRecord(null)
-    setOpenDetails(false)
+    setSaveOpen(false)
   }
 
   return (
     <Box>
-      <PermissionButton module="device" page="drones" action="create" onClick={() => onEdit('add', null)}>
+      <PermissionButton module="device" page="drones" action="create" onClick={() => onAction('add', null)}>
         添加无人机
       </PermissionButton>
 
@@ -167,19 +134,19 @@ const CarRegister = () => {
       </Box>
       <CustomPagination
           total={total}
-          pageSize={5}
+          pageSize={PAGE_SIZE}
           page={page}
           totalPage={totalPages}
           savePage={savePage}
       />
-      <SaveCarDrawer
+      <SaveDroneDrawer
           open={saveOpen}
           data={ record }
           type={type}
           onClose={ (flag) => onClose('save', flag) }
       />
 
-      <DetailsDrawer open={openDetails} onDetailsClose={onDetailsClose} data={record} />
+      {/*<DetailsDrawer open={openDetails} onDetailsClose={onDetailsClose} data={record} />*/}
     </Box>
   )
 }

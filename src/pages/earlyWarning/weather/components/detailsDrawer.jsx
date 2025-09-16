@@ -1,11 +1,11 @@
 import {Fragment} from 'react';
 import {AppBar, Box, Drawer, Toolbar, Typography, IconButton, Stack} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import {deviceStatusFilter} from '@/filters'
+import {nestStatusFilter} from '@/filters'
 
 const DetailsDrawer = (props) => {
   const { open, data, onClose } = props;
-  const { renderFireStatus } = deviceStatusFilter()
+  const { renderFireStatus } = nestStatusFilter()
   const handleClose= () => onClose()
 
   const renderContent = () => {

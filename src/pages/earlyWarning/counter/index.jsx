@@ -3,13 +3,13 @@ import {Box} from '@mui/material'
 import {renderCellExpand} from '@/components/CustomCellExpand'
 import CustomTable from '@/components/customTable'
 import DetailsDrawer from './components/detailsDrawer'
-import {deviceStatusFilter} from '@/filters';
+import {nestStatusFilter} from '@/filters';
 import { genUPSList } from '../mock'
 import {getHashrateUser} from '@/services'
 
 const ProjectUps = () => {
 
-  const { FIRE_STATUS_OPTIONS, renderFireStatus } = deviceStatusFilter()
+  const { FIRE_STATUS_OPTIONS, renderFireStatus } = nestStatusFilter()
 
   const getColumn = [
     // { headerName: '设备ID', field: 'id', flex: 1, renderCell: renderCellExpand },
@@ -55,13 +55,13 @@ const ProjectUps = () => {
       pageSize: 10,
       role_id: 2
     }
-    getHashrateUser(params).then((res) => {
-      if (res.code === 0) {
-        const data = genUPSList(res.data.data, 30)
-        console.log('data', data)
-        setTableData(data)
-      }
-    })
+    // getHashrateUser(params).then((res) => {
+    //   if (res.code === 0) {
+    //     const data = genUPSList(res.data.data, 30)
+    //     console.log('data', data)
+    //     setTableData(data)
+    //   }
+    // })
   }
 
   useEffect(() => {

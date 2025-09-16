@@ -42,11 +42,13 @@ const SaveNestDialog = (props) => {
     getDict({ type: 'nest_status' }).then((res) => {
       if (res.code === 0) {
         setStatusOptions(res.data)
-        const find = res.data.length > 0 ? res.data[0] : null
-        setValue('status', find ? find.sort : '', {
-          shouldValidate: false,
-          shouldDirty: true,
-        })
+        if (isAdd()) {
+          const find = res.data.length > 0 ? res.data[0] : null
+          setValue('status', find ? find.sort : '', {
+            shouldValidate: false,
+            shouldDirty: true,
+          })
+        }
       }
     })
   }

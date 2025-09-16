@@ -1,7 +1,7 @@
 import { renderRadiusContained, renderCircleContained } from './contained';
 import { userStatusFilter, operatorStatusFilter } from './userStatusFilter'
 import { hashRateFilter } from './hashRateFilter'
-import { deviceStatusFilter } from './deviceStatusFilter'
+import { nestStatusFilter, droneStatusFilter } from './deviceStatusFilter'
 import { renderEmptyFilter } from './emptyFilter'
 import {
   transportStatusFilter, locationStatusFilter, carStatusFilter,
@@ -15,7 +15,8 @@ export {
   renderCircleContained,
   userStatusFilter,
   hashRateFilter,
-  deviceStatusFilter,
+  nestStatusFilter,
+  droneStatusFilter,
   renderEmptyFilter,
   dispatchStatusFilter,
   carDispatchStatusFilter,

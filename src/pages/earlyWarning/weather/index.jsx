@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
 import {Box} from '@mui/material'
-import {deviceStatusFilter} from '@/filters';
+import {nestStatusFilter} from '@/filters';
 import CustomTable from '@/components/customTable';
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import DetailsDrawer from './components/detailsDrawer'
@@ -8,7 +8,7 @@ import {genFireDeviceList} from '@/pages/earlyWarning/mock';
 import {getHashrateUser} from "@/services/index.js";
 
 const ProjectFireDevice = () => {
-  const { FIRE_STATUS_OPTIONS, renderFireStatus } = deviceStatusFilter()
+  const { FIRE_STATUS_OPTIONS, renderFireStatus } = nestStatusFilter()
   const getColumn = [
     { headerName: '设备ID', field: 'id', width: 150, renderCell: renderCellExpand },
     { headerName: '设备名称', field: 'name', minWidth: 150, flex: 1, renderCell: renderCellExpand },
@@ -48,12 +48,12 @@ const ProjectFireDevice = () => {
       pageSize: 10,
       role_id: 2
     }
-    getHashrateUser(params).then((res) => {
-      if (res.code === 0) {
-        const data = genFireDeviceList(res.data.data, 30)
-        setTableData(data)
-      }
-    })
+    // getHashrateUser(params).then((res) => {
+    //   if (res.code === 0) {
+    //     const data = genFireDeviceList(res.data.data, 30)
+    //     setTableData(data)
+    //   }
+    // })
   }
 
   useEffect(() => {

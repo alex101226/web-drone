@@ -1,17 +1,12 @@
 import { http } from '@/utils'
 
-//  字典  getDict
+//  字典
 export const getDict = async ({type}) => {
   return await http.get(`/getDict?type=${type}`)
 }
 //  上传接口
 export const uploadFile = async (params) => {
   return await http.upload('/upload', params)
-}
-
-//  获取司机信息接口
-export const getDrivers = async () => {
-  return await http.get('/getDriver')
 }
 
 //  获取角色  getRoles
@@ -44,6 +39,11 @@ export const getUserInfo = async (params) => {
   return await http.get(`/getUserInfo?userId=${params.userId}`)
 }
 
+// 获取算力系统用户信息
+export const getHashrateUser = async (params) => {
+  return await http.get(`/getUser?page=${params.page}&pageSize=${params.pageSize}&role_id=${params.role_id}`, params)
+}
+
 //  获取操控员数据
 export const getOperators = async ({ page, pageSize }) => {
   return await http.get(`/getOperators?page=${page}&pageSize=${pageSize}`)
@@ -57,55 +57,6 @@ export const addOperator = async (data) => {
 //  修改操控员 updateOperator
 export const updateOperator = async (data) => {
   return await http.post('/updateOperator', data)
-}
-
-//  获取用户追踪----> 历史轨迹数据
-export const getUserTrafficHistory = async (id) => {
-  return await http.get(`/getUserTrafficHistory?user_id=${id}`)
-}
-
-//  用户追踪------> 一键定位  postUsrTrafficPositon
-export const postUsrTrafficPositon = async (data) => {
-  return await http.post('/postUsrTrafficPositon', data)
-}
-
-// 获取算力系统用户信息
-export const getHashrateUser = async (params) => {
-  return await http.get(`/getUser?page=${params.page}&pageSize=${params.pageSize}&role_id=${params.role_id}`, params)
-}
-
-//  获取车辆信息
-export const getVehicle = async (params) => {
-  return await http.get(`/getVehicle?page=${params.page}&pageSize=${params.pageSize}`, params)
-}
-
-//  添加车辆
-export const addVehicle = async (data) => {
-  return await http.post('/addVehicle', data)
-}
-
-//  修改车辆
-export const updateVehicle = async (data) => {
-  return await http.post('/updateVehicle', data)
-}
-
-//  获取可调度的车辆信息
-export const getVehicleControl = async ({page, pageSize, status}) => {
-  return await http.get(`/getVehicleControl?page=${page}&pageSize=${pageSize}&status=${status}`)
-}
-
-//  调度历史记录
-export const getVehicleControlHistory = async ({page, pageSize, vehicle_id}) => {
-  return await http.get(`/getVehicleControlHistory?page=${page}&pageSize=${pageSize}&vehicle_id=${vehicle_id}`)
-}
-//  车辆调度
-export const postDispatchVehicle = async (params) => {
-  return await http.post('/dispatchVehicle', params)
-}
-
-//  车辆一键调度
-export const postDispatchAllVehicles = async (params) => {
-  return await http.post('/dispatchAllVehicles', params)
 }
 
 //  获取任务
@@ -122,6 +73,7 @@ export const createTask = async (data) => {
 export const taskStats = async (params) => {
   return await http.get(`/taskStats`)
 }
+
 //  获取所有路线
 export const getLocations = async () => {
   return await http.get('/getLocations')
@@ -142,11 +94,6 @@ export const postLogisticsSetting = async (data) => {
   return await http.post('/postLogisticsSetting', data)
 }
 
-//  获取车辆运输数据  getTransport
-export const getTransport = async () => {
-  return await http.get(`/getTransport`)
-}
-
 //  查看完整物流路线  getCurrentTransport
 export const getCurrentTransport = async (params) => {
   return await http.get(`/getCurrentTransport?route_id=${params.route_id}`)
@@ -165,4 +112,19 @@ export const addNest = async (data) => {
 //  机巢修改  updateNest
 export const updateNest = async (data) => {
   return await http.post('/updateNest', data)
+}
+
+//  无人机查询 getDrones
+export const getDrones = async ({page, pageSize}) => {
+  return await http.get(`/getDrones?page=${page}&pageSize=${pageSize}`)
+}
+
+//  无人机添加
+export const addDrone = async (data) => {
+  return await http.post('/addDrone', data)
+}
+
+//  无人机修改
+export const updateDrone = async (data) => {
+  return await http.post('/updateDrone', data)
 }

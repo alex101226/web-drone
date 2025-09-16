@@ -92,18 +92,18 @@ const SaveLogisticsDrawer = (props) => {
     }
     if (loading) return;
     setLoading(true)
-    updateVehicle(params).then(res => {
-      if (res.code === 0) {
-        message.success('修改成功')
-      } else {
-        message.error(res.message)
-      }
-      setLoading(false)
-      handleClose(true)
-    }).catch(() => {
-      message.error('修改失败')
-      setLoading(false)
-    })
+    // updateVehicle(params).then(res => {
+    //   if (res.code === 0) {
+    //     message.success('修改成功')
+    //   } else {
+    //     message.error(res.message)
+    //   }
+    //   setLoading(false)
+    //   handleClose(true)
+    // }).catch(() => {
+    //   message.error('修改失败')
+    //   setLoading(false)
+    // })
   }
 
   const onSubmit = (data) => {

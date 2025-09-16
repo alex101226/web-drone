@@ -5,6 +5,7 @@ import CustomPagination from '@/components/customPagination'
 import PermissionButton from '@/components/permissionButton'
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import SaveUserDialog from './components/saveUserDialog'
+import { useUserStore } from '@/store'
 import {getHashrateUser} from '@/services';
 import {userStatusFilter} from '@/filters';
 import { coverDateString } from '@/utils'
@@ -59,11 +60,12 @@ const PeoplePosition = () => {
   const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
 
+  const userInfo = useUserStore(state => state.userInfo)
   const fetchUser = (p = 1) => {
     const params = {
       page: p,
       pageSize: 5,
-      role_id: 2
+      role_id: userInfo.role_id
     }
     getHashrateUser(params).then((res) => {
       if (res.code === 0) {

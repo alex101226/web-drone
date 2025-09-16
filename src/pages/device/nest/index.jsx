@@ -1,7 +1,7 @@
 import {useState, useEffect} from 'react';
 import {Box, Typography} from '@mui/material'
 import { renderCellExpand } from '@/components/CustomCellExpand'
-import { deviceStatusFilter } from '@/filters';
+import { nestStatusFilter } from '@/filters';
 import CustomTable from "@/components/customTable";
 import PermissionButton from "@/components/permissionButton";
 import CustomPagination from '@/components/customPagination'
@@ -35,7 +35,7 @@ const Nest = () => {
   const savePage = (page) => {
     setPage(page)
   }
-  const { NEST_STATUS_OPTIONS, renderNestStatus } = deviceStatusFilter()
+  const { NEST_STATUS_OPTIONS, renderNestStatus } = nestStatusFilter()
   const getColumn = [
     {
       headerName: 'ID',
@@ -64,11 +64,11 @@ const Nest = () => {
     },
     {
       headerName: '状态',
-      field: 'status_label',
+      field: 'status',
       flex: 1, minWidth: 100,
       valueOptions: NEST_STATUS_OPTIONS,
       renderCell: ({value, row}) => {
-        return renderNestStatus(row.status, value)
+        return renderNestStatus(value, row.status_label)
       }
     },
     {
@@ -99,6 +99,7 @@ const Nest = () => {
     setOpen(true)
   }
   const onClose = (flag) => {
+    console.log('修改成功后，查看传回来的参数', flag)
     if (flag) {
       fetchNest(page)
     }
@@ -126,7 +127,12 @@ const Nest = () => {
             totalPage={totalPages}
             savePage={savePage}
         />
-        <SaveNestDialog open={open} type={type} data={record} onClose={onClose} />
+        <SaveNestDialog
+            open={open}
+            type={type}
+            data={record}
+            onClose={onClose}
+        />
       </Box>
   )
 }

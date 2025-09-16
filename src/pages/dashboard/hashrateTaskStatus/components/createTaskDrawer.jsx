@@ -28,17 +28,17 @@ const CreateTaskDrawer = (props) => {
   const {open, onClose} = props
 
   //  获取所属人信息
-  const [userData, setUserData] = useState([])
-  const fetchUser = () => {
-    const params = {
-      page: 1,
-      pageSize: 1000,
-      role_id: 2
-    }
-    getHashrateUser(params).then((res) => {
-      setUserData(res.code === 0 ? res.data.data : [])
-    })
-  }
+  // const [userData, setUserData] = useState([])
+  // const fetchUser = () => {
+  //   const params = {
+  //     page: 1,
+  //     pageSize: 1000,
+  //     role_id: 2
+  //   }
+  //   getHashrateUser(params).then((res) => {
+  //     setUserData(res.code === 0 ? res.data.data : [])
+  //   })
+  // }
 
   useEffect(() => {
     if (open) {

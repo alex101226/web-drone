@@ -47,11 +47,11 @@ const Pilot = () => {
     },
     {
       headerName: '账号状态',
-      field: 'status_label',
+      field: 'status',
       flex: 1,
       minWidth: 150,
       options: OPERATOR_STATUS_OPTIONS,
-      renderCell: (params) => renderOperatorStatus(params.row, params.value),
+      renderCell: ({value, row}) => renderOperatorStatus(value, row.status_label),
     },
     {
       headerName: '',
