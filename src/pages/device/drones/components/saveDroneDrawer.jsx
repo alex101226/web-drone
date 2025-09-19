@@ -328,6 +328,7 @@ const SaveDroneDrawer = (props) => {
           />
           <FormControl error={!!errors.drone_photo} margin="normal">
             <CustomCardUpload
+                name="drone"
                 preview={dronePhoto}
                 onChangeUpload={onChangeUpload}
             />

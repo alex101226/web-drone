@@ -4,13 +4,14 @@ import {renderCellExpand} from '@/components/CustomCellExpand';
 import CustomTable from '@/components/customTable'
 import CustomPagination from '@/components/customPagination'
 import PermissionButton from '@/components/permissionButton';
-import SaveDialog from './components/saveDialog.jsx';
+import CustomImage from "@/components/customImage";
+import SaveDialog from './components/saveDialog';
 import {operatorStatusFilter} from '@/filters';
 import {getOperators} from '@/services'
-import CustomImage from "@/components/customImage/index.js";
 
 const PAGE_SIZE = 10
 //  这里要根据飞手，查找一下飞手的所有的执飞记录，用dialog弹出
+//  执飞记录
 const Pilot = () => {
   const { OPERATOR_STATUS_OPTIONS, renderOperatorStatus } = operatorStatusFilter()
   const getColumn = [
@@ -28,22 +29,7 @@ const Pilot = () => {
       field: 'license_photo',
       flex: 1,
       minWidth: 150,
-      renderCell: (params) => {
-        return params.value ? <CustomImage
-            w={60}
-            h={60}
-            fit="cover"
-            mt="calc((80px - 60px) / 2)"
-            radius={1}
-            img={globalThis.CONSTANTS.STATIC_URL + params.value}
-        /> : <Box sx={{
-          width: 60,
-          height: 60,
-          borderRadius: 1,
-          backgroundColor: '#ccc',
-          mt: 'calc((80px - 60px) / 2)' }}
-        />
-      }
+      renderCell: (params) => <CustomImage img={params.value} />
     },
     {
       headerName: '账号状态',
@@ -72,7 +58,6 @@ const Pilot = () => {
       }
     },
   ]
-
   const [tableData, setTableData] = useState([])
   const [total, setTotal] = useState(0)
   const [page, setPage] = useState(1)
@@ -84,22 +69,19 @@ const Pilot = () => {
     }
     getOperators(params).then((res) => {
       if (res.code === 0) {
-        setTableData(res.data.data)
         setTotal(res.data.total)
         setTableData(res.data.data)
         setTotalPages(res.data.totalPages)
       }
     })
   }
-
-  useEffect(() => {
-    fetchOperator()
-  }, [])
-
   const savePage = (page) => {
     setPage(page)
     fetchOperator(page)
   }
+  useEffect(() => {
+    fetchOperator()
+  }, [])
 
   const [type, setType] = useState('add')
   const [record, setRecord] = useState(null);

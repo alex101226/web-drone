@@ -89,9 +89,9 @@ export const postLogistics = async (data) => {
   return await http.post('/postLogistics', data)
 }
 
-//  路线设置可用/禁用 postLogisticsSetting
+//  路线修改
 export const postLogisticsSetting = async (data) => {
-  return await http.post('/postLogisticsSetting', data)
+  return await http.post('/updateLogistics', data)
 }
 
 //  查看完整物流路线  getCurrentTransport
@@ -115,8 +115,8 @@ export const updateNest = async (data) => {
 }
 
 //  无人机查询 getDrones
-export const getDrones = async ({page, pageSize}) => {
-  return await http.get(`/getDrones?page=${page}&pageSize=${pageSize}`)
+export const getDrones = async ({page, pageSize, operator_id}) => {
+  return await http.get(`/getDrones?page=${page}&pageSize=${pageSize}&name=${operator_id}`)
 }
 
 //  无人机添加
@@ -127,4 +127,9 @@ export const addDrone = async (data) => {
 //  无人机修改
 export const updateDrone = async (data) => {
   return await http.post('/updateDrone', data)
+}
+
+//  无人机删除 deleteDrone
+export const deleteDrone = async (data) => {
+  return await http.post(`/deleteDrone`, data)
 }

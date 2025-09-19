@@ -17,8 +17,8 @@ const initialState = {
   nest_name: '',
   capacity: '',
   status: 1,
-  longitude: 116.404,
-  latitude: 39.915
+  longitude: 0,
+  latitude: 0
 }
 
 const SaveNestDialog = (props) => {
@@ -87,8 +87,8 @@ const SaveNestDialog = (props) => {
   }
 
   //  修改执行
-  const onUpdate = (data) => {
-    updateNest({ ...data, nest_id: 1 }).then(res => {
+  const onUpdate = (params) => {
+    updateNest({ ...params, nest_id: data.id }).then(res => {
       if (res.code === 0) {
         message.success(res.message)
         handleClose(true)
@@ -100,6 +100,18 @@ const SaveNestDialog = (props) => {
       message.error('修改失败')
       setLoading(false)
     })
+  }
+
+  //  获取定位
+  const savePosition = (position) => {
+    reset({
+      longitude: position.point.lng,
+      latitude: position.point.lat,
+    }, {
+      keepDirty: true,     // 保留已改动的字段状态
+      keepErrors: true,    // 保留错误
+      keepTouched: true    // 保留触碰状态
+    });
   }
 
   //  提交按钮
@@ -184,10 +196,11 @@ const SaveNestDialog = (props) => {
 
       <Box sx={{ height: '300px' }}>
         <MapGL3D
-            center={{ lng: 116.404, lat: 39.915 }}
+            data={data}
             zoom={16}
             tilt={60}
             heading={45}
+            savePosition={savePosition}
         />
       </Box>
     </Box>;

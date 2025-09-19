@@ -1,5 +1,5 @@
 import DriveEtaOutlinedIcon from "@mui/icons-material/DriveEtaOutlined";
-import CarLogisticsRoute from "@/pages/control/carLogisticsRoute/index.jsx";
+import CarLogisticsRoute from "@/pages/control/route/index.jsx";
 import CarControl from "@/pages/control/carControl/index.jsx";
 
 export const controlRoutes = [

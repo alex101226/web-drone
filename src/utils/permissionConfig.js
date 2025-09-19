@@ -20,4 +20,14 @@ export const rolePermissions = {
       admin: { create: false, update: false, delete: false, read: true },
     },
   },
+  control: {
+    route: {
+      root: { create: true, update: true, delete: true, read: true },
+      admin: { create: false, update: false, delete: false, read: true },
+    },
+    nest: {
+      root: { create: true, update: true, delete: true, read: true },
+      admin: { create: false, update: false, delete: false, read: true },
+    },
+  },
 };

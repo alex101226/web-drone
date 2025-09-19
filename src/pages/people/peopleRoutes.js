@@ -7,7 +7,7 @@ export const peopleRoutes = [
     path: 'user',
     handle: {
       hideSide: false,
-      title: '飞手管理',
+      title: '用户管理',
       icon: <ControlCameraOutlinedIcon />,
     },
     children: [

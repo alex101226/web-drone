@@ -96,10 +96,8 @@ const GridCellExpand = memo(function GridCellExpand(props) {
   );
 });
 
-
 export const renderCellExpand = (params) => {
   return (
       <GridCellExpand value={params.value || ''} width={params.colDef.computedWidth} />
   );
 }
-export default GridCellExpand;

@@ -1,4 +1,3 @@
-const Login = require("@/pages/user/login/index.jsx");
 globalThis.CONSTANTS = {
   THEME: [
     {label: '浅色', mode: 'light', color: '#fff'},

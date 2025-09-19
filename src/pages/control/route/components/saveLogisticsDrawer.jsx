@@ -4,9 +4,9 @@ import {
   AppBar, Box, Toolbar, FormControl, FormHelperText, InputLabel, InputAdornment,
   Select, MenuItem, OutlinedInput, Button, styled,
 } from '@mui/material';
-import CustomDrawer from '@/components/customDrawer/index.jsx'
-import {coverDateObj, message} from '@/utils/index.js'
-import { postLogistics, updateVehicle, getLocations } from '@/services/index.js'
+import CustomDrawer from '@/components/customDrawer'
+import {coverDateObj, message} from '@/utils'
+import { postLogistics, updateVehicle, getLocations } from '@/services'
 
 const initialState = {
   route_name: '',

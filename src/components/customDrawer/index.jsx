@@ -2,7 +2,7 @@ import {AppBar, Box, Divider, Drawer, IconButton, Toolbar, Typography} from '@mu
 import CloseIcon from "@mui/icons-material/Close";
 
 const CustomDrawer = (props) => {
-  const {open, onClose, w = 40, title, children, actions} = props
+  const {open, onClose, w = 40, h = 100, title, children, actions, ...resetProps } = props
 
   const handleClose = () => {
     onClose()
@@ -16,9 +16,11 @@ const CustomDrawer = (props) => {
           sx={{
             zIndex: (theme) => theme.zIndex.drawer + 2,
             '& .MuiDrawer-paper': {
-              width: `${w}%`
+              width: `${w}%`,
+              height: `${h}%`,
             },
-          }}>
+          }}
+          {...resetProps}>
         <AppBar elevation={0} component="nav" sx={{ position: 'sticky', width: '100%'}}>
           <Toolbar>
             <Typography

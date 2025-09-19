@@ -4,6 +4,8 @@ import { useState } from 'react';
 export const useBMapGL = () => {
 
   const [isBMapLoaded, setIsBMapLoaded] = useState(false);
+
+  //  创建地图
   const loadBMapGL = () => {
     return new Promise((resolve, reject) => {
       if (isBMapLoaded) {
@@ -25,5 +27,6 @@ export const useBMapGL = () => {
       }
     })
   }
+
   return { loadBMapGL }
 }

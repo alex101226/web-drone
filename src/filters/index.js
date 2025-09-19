@@ -20,5 +20,5 @@ export {
   renderEmptyFilter,
   dispatchStatusFilter,
   carDispatchStatusFilter,
-  operatorStatusFilter
+  operatorStatusFilter,
 }
