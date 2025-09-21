@@ -6,15 +6,18 @@ import {CardContent, Card, CardActions} from '@mui/material';
  * @cardType Card type, contained | outlined
  * @actionChildren CardActions jsx
  * @cardActionStyle CardActions style
+ * @cardContentStyle CardContent style
  */
 const CustomCard = (props) => {
-  const { children, cardType = 'contained', actionChildren, cardActionStyle, ...resetProps } = props
+  const {
+    children, cardType = 'contained', actionChildren, cardActionStyle,
+    cardContentStyle, ...resetProps } = props
   return (
     <Card variant={cardType} {...resetProps}>
       {
         actionChildren && <CardActions sx={cardActionStyle}>{actionChildren}</CardActions>
       }
-      <CardContent>
+      <CardContent sx={cardContentStyle}>
         { children }
       </CardContent>
     </Card>

@@ -1,6 +1,6 @@
 import {useState, useEffect} from 'react';
-import {Box} from '@mui/material'
-import { locationStatusFilter } from '@/filters/index.js';
+import {Box, Autocomplete, Stack, TextField, Typography} from '@mui/material'
+import { locationStatusFilter, routeUsedStatusFilter } from '@/filters/index.js';
 import CustomTable from "@/components/customTable/index.js";
 import CustomPagination from '@/components/customPagination/index';
 import { renderCellExpand } from '@/components/CustomCellExpand/index'
@@ -8,9 +8,10 @@ import SaveRouteDrawer from "./components/saveRouteDrawer";
 import { getLogistics } from '@/services'
 import PermissionButton from "@/components/permissionButton/index.jsx";
 
-//  0=未使用，1=已使用，2=禁用
+const PAGE_SIZE = 10;
 const CarLogisticsRoute = () => {
   const { LOCATION_STATUS_OPTIONS, renderLocationStatus } = locationStatusFilter()
+  const { ROUTE_USED_STATUS_OPTIONS, renderRouteUsedStatus } = routeUsedStatusFilter()
   const getColumn = () => {
     return [
       { headerName: 'ID', field: 'id', flex: 1, minWidth: 80,},
@@ -21,6 +22,13 @@ const CarLogisticsRoute = () => {
         flex: 1, minWidth: 150,
         renderCell: (params) => renderLocationStatus(params.value),
         valueOptions: LOCATION_STATUS_OPTIONS,
+      },
+      {
+        headerName: '是否被使用',
+        field: 'current_is_used',
+        flex: 1, minWidth: 150,
+        renderCell: (params) => renderRouteUsedStatus(params.value),
+        valueOptions: ROUTE_USED_STATUS_OPTIONS,
       },
       {
         headerName: '操作',
@@ -46,12 +54,15 @@ const CarLogisticsRoute = () => {
   //  获取车辆信息
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
+  const [searchParams, setSearchParams] = useState({
+    page: 1,
+    route_id: ''
+  })
   const fetchLogistics =  (p = 1) => {
     const params = {
-      page: p,
-      pageSize: 10,
+      ...searchParams,
+      pageSize: PAGE_SIZE,
     }
     getLogistics(params).then((res) => {
       if (res.code === 0) {
@@ -64,12 +75,20 @@ const CarLogisticsRoute = () => {
 
   useEffect(() => {
     fetchLogistics()
-  }, [])
+  }, [searchParams])
 
   //  分页查看
   const savePage = (page) => {
-    fetchLogistics(page)
-    setPage(page)
+    setSearchParams({ ...searchParams, page })
+  }
+
+  //  路线名称
+  const handleSearch = (event, row) => {
+    setSearchParams({ ...searchParams, route_id: row.id })
+  }
+  //  重置
+  const resetSearch = () => {
+    setSearchParams({ ...searchParams, route_id: '' })
   }
 
   //  查看路线
@@ -80,9 +99,7 @@ const CarLogisticsRoute = () => {
   const onAction = (type, row) => () => {
     setOpen(true)
     setType(type)
-    if (type === 'update') {
-      setRecord(row)
-    }
+    setRecord(row)
   }
 
   //  操作完，关闭窗口
@@ -101,6 +118,34 @@ const CarLogisticsRoute = () => {
             onClick={onAction('add', null)}>
           添加路线
         </PermissionButton>
+        <Stack spacing={2} direction="row" alignItems="center" sx={{my: 2}}>
+          <Typography component="p" variant="p">请输入路线名称：</Typography>
+          <Autocomplete
+              freeSolo
+              disableClearable
+              sx={{ width: 300 }}
+              options={data}
+              getOptionKey={(option) => option.sort}
+              getOptionLabel={(option) => option.route_name || ''}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              onChange={handleSearch}
+              onInputChange={resetSearch}
+              renderInput={(params) => (
+                  <TextField
+                      {...params}
+                      size="small"
+                      label=""
+                      placeholder="请选择调度状态"
+                      slotProps={{
+                        input: {
+                          ...params.InputProps,
+                          type: 'search',
+                        },
+                      }}
+                  />
+              )}
+          />
+        </Stack>
 
         <Box sx={{ height: 'calc(100vh) - 250px', mt: 2 }}>
           <CustomTable
@@ -113,8 +158,8 @@ const CarLogisticsRoute = () => {
         </Box>
         <CustomPagination
             total={total}
-            pageSize={5}
-            page={page}
+            pageSize={PAGE_SIZE}
+            page={searchParams.page}
             totalPage={totalPages}
             savePage={savePage}
         />

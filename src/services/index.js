@@ -133,3 +133,24 @@ export const updateDrone = async (data) => {
 export const deleteDrone = async (data) => {
   return await http.post(`/deleteDrone`, data)
 }
+
+//  无人机调度 dispatch
+export const dispatch = async (data) => {
+  return await http.post('/dispatch', data)
+}
+
+//  一键调度  dispatchBatch
+export const dispatchBatch = async (data) => {
+  return await http.post('/dispatchBatch', data)
+}
+
+//  获取调度记录  getDispatch
+export const getDispatch = async (params) => {
+  const { page, pageSize, status } = params
+  return await http.get(`/getDispatch?page=${page}&pageSize=${pageSize}&status=${status}`)
+}
+
+//  获取气象数据  getWeather
+export const getWeather = async (params) => {
+  return await http.get(`/getWeather?city=${params.city}`)
+}

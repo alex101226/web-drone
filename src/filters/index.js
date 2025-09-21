@@ -1,15 +1,13 @@
 import { renderRadiusContained, renderCircleContained } from './contained';
 import { userStatusFilter, operatorStatusFilter } from './userStatusFilter'
 import { hashRateFilter } from './hashRateFilter'
-import { nestStatusFilter, droneStatusFilter } from './deviceStatusFilter'
-import { renderEmptyFilter } from './emptyFilter'
 import {
-  transportStatusFilter, locationStatusFilter, carStatusFilter,
-  dispatchStatusFilter, carDispatchStatusFilter } from './vehicleStatusFilters'
+  nestStatusFilter, droneStatusFilter, locationStatusFilter,
+  routeUsedStatusFilter, dispatchStatusFilter } from './deviceStatusFilter'
+import { renderEmptyFilter } from './emptyFilter'
+import { weatherIconFilter } from './weatherFilter'
 
 export {
-  carStatusFilter,
-  transportStatusFilter,
   locationStatusFilter,
   renderRadiusContained,
   renderCircleContained,
@@ -19,6 +17,7 @@ export {
   droneStatusFilter,
   renderEmptyFilter,
   dispatchStatusFilter,
-  carDispatchStatusFilter,
   operatorStatusFilter,
+  routeUsedStatusFilter,
+  weatherIconFilter
 }

@@ -1,6 +1,7 @@
 import DriveEtaOutlinedIcon from "@mui/icons-material/DriveEtaOutlined";
-import CarLogisticsRoute from "@/pages/control/route/index.jsx";
-import CarControl from "@/pages/control/carControl/index.jsx";
+import Route from "@/pages/control/route";
+import Control from "@/pages/control/control";
+import Area from './area'
 
 export const controlRoutes = [
   {
@@ -13,7 +14,7 @@ export const controlRoutes = [
     children: [
       {
         path: 'logistics',
-        Component: CarLogisticsRoute,
+        Component: Route,
         handle: {
           hideSide: false,
           title: '路线管理',
@@ -22,11 +23,20 @@ export const controlRoutes = [
       },
       {
         path: 'control',
-        Component: CarControl,
+        Component: Control,
         handle: {
           hideSide: false,
           title: '智能调度',
           // icon: <EditCalendarOutlinedIcon />,
+        }
+      },
+      {
+        path: 'area',
+        Component: Area,
+        handle: {
+          hideSide: false,
+          title: '区域规划',
+          // icon: <AddRoadOutlinedIcon />,
         }
       },
     ]

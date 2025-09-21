@@ -169,6 +169,15 @@ export const getMuiTheme = (mode = 'light') => {
           },
         },
       },
+      MuiCheckbox: {
+        styleOverrides: {
+          root: {
+            '&.Mui-checked': {
+              color: 'var(--custom-palette-color-3)',
+            }
+          }
+        }
+      }
     },
   }, zhCN, dataGridZhCN, dateZhCN);
 };

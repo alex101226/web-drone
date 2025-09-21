@@ -12,8 +12,8 @@ export const rolePermissions = {
   },
   device: {
     drones: {
-      root: { create: true, update: true, delete: true, read: true },
-      admin: { create: false, update: false, delete: false, read: true },
+      root: { create: true, update: true, delete: true, read: true, dispatch: true },
+      admin: { create: false, update: false, delete: false, read: true, dispatch: true },
     },
     nest: {
       root: { create: true, update: true, delete: true, read: true },

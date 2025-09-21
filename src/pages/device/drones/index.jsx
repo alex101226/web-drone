@@ -1,4 +1,4 @@
-import {useState, useEffect, Fragment} from 'react';
+import {useState, useEffect, Fragment, useMemo} from 'react';
 import {Autocomplete, Box, Button, Popover, Stack, TextField, Typography} from '@mui/material'
 import CustomTable from "@/components/customTable";
 import CustomPagination from '@/components/customPagination';
@@ -6,9 +6,14 @@ import CustomImage from '@/components/customImage'
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import PermissionButton from "@/components/permissionButton";
 import SaveDroneDrawer from './components/saveDroneDrawer'
-import {getDrones, getOperators, deleteDrone} from '@/services'
+import {getDrones, getOperators, deleteDrone, dispatch, dispatchBatch} from '@/services'
 import {droneStatusFilter} from '@/filters';
 import {message} from "@/utils";
+
+const initialStateSelectionModel = {
+  type: 'include',
+  ids: new Set(),
+}
 
 const PAGE_SIZE = 10
 const Drones = () => {
@@ -44,9 +49,17 @@ const Drones = () => {
       {
         headerName: '操作',
         field: 'action',
-        flex: 1, minWidth: 150,
+        flex: 1, minWidth: 180,
         renderCell: (params) => {
-          return <Box sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-start' }}>
+          return <Box sx={{ display: 'flex', flexWrap: 'wrap', height: '100%', alignItems: 'center' }}>
+            <PermissionButton
+                type="text"
+                module="device"
+                page="drones"
+                action="dispatch"
+                onClick={() => onAction('dispatch', params.row)}>
+              调度
+            </PermissionButton>
             <PermissionButton
                 type="text"
                 module="device"
@@ -147,6 +160,11 @@ const Drones = () => {
     setSearchParams({ ...searchParams, operator_id: row.id})
   }
 
+  //  重置
+  const resetSearch = () => {
+    setSearchParams({ ...searchParams, operator_id: '' })
+  }
+
   //  分页查看
   const savePage = (page) => {
     setSearchParams({ ...searchParams, page })
@@ -184,9 +202,14 @@ const Drones = () => {
   const [record, setRecord] = useState(null);
   const [type, setType] = useState('add');
   const onAction = (type, row) => {
+
     setRecord(row ? row : null)
-    setType(type)
-    setSaveOpen(true)
+    if (['dispatch', 'dispatchBatch'].includes(type)) {
+      handleDispatch(type, row.id)
+    } else {
+      setType(type)
+      setSaveOpen(true)
+    }
   };
 
   //  关闭活动窗口
@@ -196,6 +219,65 @@ const Drones = () => {
     }
     setSaveOpen(false)
   }
+
+  //  无人机集合
+  const [selectionModel, setSelectionModel] = useState(initialStateSelectionModel);
+  const changeSelectionModal = (type, rows) => {
+    setSelectionModel(rows)
+  }
+
+  //  无人机调度
+  const [loadings, setLoadings] = useState({
+    dispatch: false,
+    allDispatch: false,
+  })
+
+  //  单个调度
+  const onDispatch = (id) => {
+    if (loadings.dispatch) return;
+    setLoadings({ dispatch: true })
+    dispatch({ id }).then(res => {
+      if (res.code === 0) {
+        message.success(res.message)
+        fetchDrone()
+        setSelectionModel(initialStateSelectionModel)
+      } else {
+        message.error(res.message)
+      }
+      setLoadings({ dispatch: false })
+    }).catch((err) => {
+      message.error(err.message)
+      setLoadings({ dispatch: false })
+    })
+  }
+
+  //  多个调度
+  const onDispatchBatch = () => {
+    if (loadings.allDispatch) return;
+    setLoadings({ allDispatch: true })
+    dispatchBatch({ ids: Array.from(selectionModel.ids) }).then(res => {
+      if (res.code === 0) {
+        message.success(res.message)
+        fetchDrone()
+        setSelectionModel(initialStateSelectionModel)
+      } else {
+        message.error(res.message)
+      }
+      setLoadings({ allDispatch: false })
+    }).catch((err) => {
+      message.error(err.message)
+      setLoadings({ allDispatch: false })
+    })
+  }
+  // 调度
+  const handleDispatch = (type, id) => {
+    if (type === 'dispatchBatch') {
+      onDispatchBatch()
+    } else {
+      onDispatch(id)
+    }
+  }
+
   return (
     <Box>
       <PermissionButton
@@ -216,6 +298,7 @@ const Drones = () => {
             getOptionLabel={(option) => option.operator_name || ''}
             isOptionEqualToValue={(option, value) => option.id === value.id}
             onChange={handleSearch}
+            onInputChange={resetSearch}
             renderInput={(params) => (
                 <TextField
                     {...params}
@@ -231,16 +314,29 @@ const Drones = () => {
                 />
             )}
         />
+
+        <PermissionButton
+            module="device"
+            page="drones"
+            action="dispatch"
+            loading={loadings.allDispatch}
+            disabled={selectionModel.ids.size === 0}
+            onClick={() => onAction('dispatchBatch', null)}>
+          一键调度
+        </PermissionButton>
       </Stack>
 
       <Box sx={{ height: 'calc(100vh - 270px)', mt: 2 }}>
         <CustomTable
             tableData={data}
             column={getColumn()}
-            rowKeyProp="drone_sn"
+            rowKeyProp="id"
             hideFooter
-            rowHeight={120}
+            rowHeight={80}
             loading={loading}
+            checkboxSelection
+            rowSelectionModel={selectionModel}
+            onRowSelectionModelChange={(rowSelectionModel) => changeSelectionModal('add', rowSelectionModel)}
         />
       </Box>
       <CustomPagination
@@ -256,8 +352,6 @@ const Drones = () => {
           type={type}
           onClose={ (flag) => onClose('save', flag) }
       />
-
-      {/*<DetailsDrawer open={openDetails} onDetailsClose={onDetailsClose} data={record} />*/}
     </Box>
   )
 }

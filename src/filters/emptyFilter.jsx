@@ -1,6 +1,9 @@
 import { renderCellExpand } from '@/components/CustomCellExpand'
 
-export const renderEmptyFilter = (params) => {
+export const renderEmptyFilter = (params, expand = true) => {
   if (!params.value) return '--';
-  return renderCellExpand(params);
+  if (expand) {
+    return renderCellExpand(params);
+  }
+  return params.value
 }

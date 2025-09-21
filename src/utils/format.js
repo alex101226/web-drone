@@ -29,6 +29,8 @@ export const formatDate = (str) => {
       return 'YYYY年MM月DD日 HH时mm分ss秒'
     case '11':
       return 'HH'
+    case '12':
+      return 'HH:mm'
     default:
       return 'YYYY-MM-DD'
   }

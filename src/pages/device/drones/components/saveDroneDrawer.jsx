@@ -7,7 +7,7 @@ import {
 import CustomCardUpload from '@/components/customCardUpload'
 import CustomDrawer from '@/components/customDrawer'
 import {message} from '@/utils'
-import { addDrone, updateDrone, getOperators, getDict } from '@/services'
+import {addDrone, updateDrone, getOperators, getDict, getNests} from '@/services'
 import { useUserStore } from '@/store'
 
 const initialState = {
@@ -19,7 +19,10 @@ const initialState = {
   camera_specs: '',
   drone_photo: '',
   drone_name: '',
-  status: '1'
+  status: '1',
+  latitude: '',
+  longitude: '',
+  nest: 0
 }
 
 const InputHelp = styled(FormHelperText)({
@@ -75,6 +78,21 @@ const SaveDroneDrawer = (props) => {
     setCameraOptions(data)
   }
 
+  //  机巢
+  const [nestsOptions, setNestsOptions] = useState([])
+  const fetchNest = () => {
+    const params = {
+      page: 1,
+      pageSize: 1000,
+    }
+    getNests(params).then(({ data, code }) => {
+      if (code === 0) {
+        setNestsOptions(data.data)
+      }
+    })
+  }
+
+  //  字典
   const fetchDict = (type) => {
     getDict({ type: type }).then((res) => {
       if (res.code === 0) {
@@ -94,6 +112,7 @@ const SaveDroneDrawer = (props) => {
     fetchUser()
     fetchDict('drone_status')
     fetchDict('camera_model')
+    fetchNest()
   }
 
   useEffect(() => {
@@ -106,9 +125,20 @@ const SaveDroneDrawer = (props) => {
     if (data) {
       reset({
         ...data,
+        nest: 0
       })
     }
   }, [data])
+
+  //  获取经纬度
+  const nest = watch('nest')
+  useEffect(() => {
+    const find = nestsOptions.find(item => item.id === nest)
+    if (find) {
+      setValue('latitude', find.latitude)
+      setValue('longitude', find.longitude)
+    }
+  }, [nest])
 
   //  关闭窗口
   const handleClose = (flag) => {
@@ -325,6 +355,34 @@ const SaveDroneDrawer = (props) => {
                     </InputHelp>
                   </FormControl>
               )}
+          />
+          <Controller
+              name="nest"
+              control={control}
+              rules={{ required: '请选择无人机位置' }}
+              render={({ field }) => {
+                return (
+                    <FormControl fullWidth margin="normal">
+                      <InputLabel id="nest-label">无人机位置</InputLabel>
+                      <Select
+                          labelId="nest-label"
+                          id="nest"
+                          label="无人机位置"
+                          aria-describedby="nest-helper-text"
+                          disabled={data && [2, 5].includes(data.status)}
+                          value={field.value}
+                          onChange={(newValue) => field.onChange(newValue)}>
+                        {
+                          nestsOptions.map((option, index) => (
+                              <MenuItem key={index} value={option.id}>
+                                { option.nest_name }
+                              </MenuItem>
+                          ))
+                        }
+                      </Select>
+                    </FormControl>
+                )
+              }}
           />
           <FormControl error={!!errors.drone_photo} margin="normal">
             <CustomCardUpload

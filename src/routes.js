@@ -3,7 +3,7 @@ import Login from './pages/user/login';
 import Layout from './layout';
 import { dashboardRoutes } from '@/pages/dashboard/dashboardRoutes.js'
 import { deviceRoutes } from '@/pages/device/deviceRoutes.js'
-import { earlyRoutes } from '@/pages/earlyWarning/earlyRoutes.js'
+import { earlyRoutes } from '@/pages/earlyWarn/earlyRoutes.js'
 import { peopleRoutes } from '@/pages/people/peopleRoutes.js'
 import { controlRoutes } from '@/pages/control/controlRoutes'
 import UserInfo from "@/pages/user/userInfo/index.jsx";

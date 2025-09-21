@@ -12,7 +12,7 @@ export const earlyRoutes = [
     },
     children: [
       {
-        path: 'fire-device',
+        path: 'weather',
         Component: Weather,
         handle: {
           hideSide: false,

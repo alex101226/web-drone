@@ -13,6 +13,7 @@ const initialState = {
   status: '1',
   route_name: '',
   remark: '',
+  expect_complete_time: 1,
   points: []
 }
 
@@ -49,9 +50,10 @@ const SaveRouteDrawer = props => {
   }, [data, open])
 
   const status = watch('status')
+  const points = watch('points')
   //  关闭
   const handleClose = (flag) => {
-    reset()
+    reset(initialState)
     onClose(flag);
   }
 
@@ -166,6 +168,20 @@ const SaveRouteDrawer = props => {
                 labelPlacement="start"
             />
           </FormControl>
+          <FormControl fullWidth error={!!errors.expect_complete_time} margin="normal">
+            <InputLabel htmlFor="expect_complete_time">预计巡航时间</InputLabel>
+            <OutlinedInput
+                label="预计巡航时间"
+                id="expect_complete_time"
+                aria-describedby="expect_complete_time-helper-text"
+                {...register("expect_complete_time", {
+                  required: '请输入预计巡航时间',
+                })}
+            />
+            <InputHelp id="expect_complete_time-helper-text">
+              {errors.expect_complete_time?.message}
+            </InputHelp>
+          </FormControl>
           <FormControl fullWidth error={!!errors.remark} margin="normal">
             <InputLabel htmlFor="remark">路线描述</InputLabel>
             <OutlinedInput
@@ -180,8 +196,8 @@ const SaveRouteDrawer = props => {
               {errors.remark?.message}
             </InputHelp>
           </FormControl>
-          <Box sx={{height: '300px'}}>
-            <MapGL3D multiple data={data.points || []} savePosition={savePosition} />
+          <Box sx={{height: '500px'}}>
+            <MapGL3D multiple data={points || []} savePosition={savePosition} />
           </Box>
         </Box>
     )
