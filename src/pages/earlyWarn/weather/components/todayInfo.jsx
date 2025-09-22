@@ -13,10 +13,10 @@ const TodayInfo = ({ data }) => {
           flex: 1,
           p: 0.5,
         }}>
-          <Typography component="h5" variant="h5">
+          <Typography component="h6" variant="h6">
             { renderEmptyFilter({value: data.city_name}, false) }
           </Typography>
-          <Typography component="h5" variant="h5">
+          <Typography component="h6" variant="h6">
             { renderEmptyFilter({value: data.uptime}, false) }
           </Typography>
         </Box>
@@ -35,7 +35,7 @@ const TodayInfo = ({ data }) => {
           <Typography component="div" variant="body2">
             风力等级：{ renderEmptyFilter({value: data.wind_class}, false) }
           </Typography>
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid size={6}>
               <Typography component="div" variant="body2">
                 风向：{ renderEmptyFilter({value: data.wind}, false) }
@@ -48,7 +48,7 @@ const TodayInfo = ({ data }) => {
             </Grid>
           </Grid>
 
-          <Grid container spacing={2}>
+          <Grid container spacing={1}>
             <Grid size={6}>
               <Typography component="div" variant="body2">
                 气压：{ renderEmptyFilter({value: data.pressure}, false) }
@@ -71,10 +71,11 @@ const TodayInfo = ({ data }) => {
           actionChildren={renderAction()}
           children={renderContent()}
           cardActionStyle={{
-            backgroundColor: 'red',
+            backgroundColor: '#0F828C',
           }}
           cardContentStyle={{
-            backgroundColor: 'orange',
+            backgroundColor: '#78B9B5',
+            p: 1
           }}
           sx={{
             borderRadius: 8

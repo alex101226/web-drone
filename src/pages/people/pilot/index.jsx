@@ -32,13 +32,14 @@ const Pilot = () => {
       renderCell: (params) => <CustomImage img={params.value} />
     },
     {
-      headerName: '账号状态',
+      headerName: '状态',
       field: 'status',
       flex: 1,
       minWidth: 150,
       options: OPERATOR_STATUS_OPTIONS,
       renderCell: ({value, row}) => renderOperatorStatus(value, row.status_label),
     },
+    {headerName: '飞行时长（H）', field: 'total_hours', flex: 1,},
     {
       headerName: '',
       field: 'action',

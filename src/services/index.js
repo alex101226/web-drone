@@ -9,6 +9,20 @@ export const uploadFile = async (params) => {
   return await http.upload('/upload', params)
 }
 
+//  无人机巡航区域数据 getRegion
+export const getRegion = async () => {
+  return await http.get(`/getRegion`)
+}
+//  站内信
+export const getMessage = async () => {
+  return await http.get(`/getMessage`)
+}
+
+//  站内信已读
+export const readMessage = async (params) => {
+  return await http.post(`/readMessage`, params)
+}
+
 //  获取角色  getRoles
 export const getRoles = async () => {
   return await http.get('/getRoles')
@@ -80,8 +94,8 @@ export const getLocations = async () => {
 }
 
 //  获取路线数据
-export const getLogistics = async ({page, pageSize}) => {
-  return await http.get(`/getLogistics?page=${page}&pageSize=${pageSize}`)
+export const getLogistics = async ({page, pageSize, route_id}) => {
+  return await http.get(`/getLogistics?page=${page}&pageSize=${pageSize}&route_id=${route_id}`)
 }
 
 //  添加路线
@@ -119,6 +133,11 @@ export const getDrones = async ({page, pageSize, operator_id}) => {
   return await http.get(`/getDrones?page=${page}&pageSize=${pageSize}&name=${operator_id}`)
 }
 
+//  无人机历史飞行记录查询 droneHistory
+export const droneHistory = async (params) => {
+  const { page, pageSize, droneId, operatorId } = params
+  return http.get(`/droneHistory?page=${page}&pageSize=${pageSize}&droneId=${droneId}&operatorId=${operatorId}`)
+}
 //  无人机添加
 export const addDrone = async (data) => {
   return await http.post('/addDrone', data)
@@ -153,4 +172,9 @@ export const getDispatch = async (params) => {
 //  获取气象数据  getWeather
 export const getWeather = async (params) => {
   return await http.get(`/getWeather?city=${params.city}`)
+}
+
+//  无人机反制系统数据 getAnti
+export const getAnti = async (params) => {
+  return await http.get(`/getAnti?page=${params.page}&pageSize=${params.pageSize}`)
 }

@@ -13,7 +13,7 @@ export const controlRoutes = [
     },
     children: [
       {
-        path: 'logistics',
+        path: 'route',
         Component: Route,
         handle: {
           hideSide: false,
@@ -22,7 +22,7 @@ export const controlRoutes = [
         }
       },
       {
-        path: 'control',
+        path: 'dispatch',
         Component: Control,
         handle: {
           hideSide: false,

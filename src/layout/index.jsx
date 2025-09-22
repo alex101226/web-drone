@@ -54,8 +54,8 @@ const Layout = () => {
         </Box>
       </Stack>
 
-      {/*{showButton() && renderFixedButton()}*/}
-      {/*<CustomServiceDrawer />*/}
+      {showButton() && renderFixedButton()}
+      <CustomServiceDrawer />
     </Box>
   )
 }

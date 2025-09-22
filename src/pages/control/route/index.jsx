@@ -1,15 +1,28 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import {Box, Autocomplete, Stack, TextField, Typography} from '@mui/material'
 import { locationStatusFilter, routeUsedStatusFilter } from '@/filters/index.js';
 import CustomTable from "@/components/customTable/index.js";
 import CustomPagination from '@/components/customPagination/index';
 import { renderCellExpand } from '@/components/CustomCellExpand/index'
 import SaveRouteDrawer from "./components/saveRouteDrawer";
-import { getLogistics } from '@/services'
+import { getLogistics, getLocations } from '@/services'
 import PermissionButton from "@/components/permissionButton/index.jsx";
 
 const PAGE_SIZE = 10;
 const CarLogisticsRoute = () => {
+  const [routeOptions, setRouteOptions] = useState([]);
+  const fetchRoute = () => {
+    getLocations().then((res) => {
+      if (res.code === 0) {
+        setRouteOptions(res.data)
+      }
+    })
+  }
+  useEffect(() => {
+    fetchRoute()
+  }, [])
+
+  //  线路列表数据
   const { LOCATION_STATUS_OPTIONS, renderLocationStatus } = locationStatusFilter()
   const { ROUTE_USED_STATUS_OPTIONS, renderRouteUsedStatus } = routeUsedStatusFilter()
   const getColumn = () => {
@@ -23,6 +36,7 @@ const CarLogisticsRoute = () => {
         renderCell: (params) => renderLocationStatus(params.value),
         valueOptions: LOCATION_STATUS_OPTIONS,
       },
+      { headerName: '预计巡航时间（H）', field: 'expect_complete_time', flex: 1, minWidth: 80,},
       {
         headerName: '是否被使用',
         field: 'current_is_used',
@@ -50,8 +64,6 @@ const CarLogisticsRoute = () => {
       },
     ]
   }
-
-  //  获取车辆信息
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
   const [totalPages, setTotalPages] = useState(0)
@@ -93,7 +105,6 @@ const CarLogisticsRoute = () => {
 
   //  查看路线
   const [record, setRecord] = useState({})
-  //  添加路线
   const [type, setType] = useState('add')
   const [open, setOpen] = useState(false)
   const onAction = (type, row) => () => {
@@ -124,7 +135,7 @@ const CarLogisticsRoute = () => {
               freeSolo
               disableClearable
               sx={{ width: 300 }}
-              options={data}
+              options={routeOptions}
               getOptionKey={(option) => option.sort}
               getOptionLabel={(option) => option.route_name || ''}
               isOptionEqualToValue={(option, value) => option.id === value.id}
@@ -169,13 +180,6 @@ const CarLogisticsRoute = () => {
             data={record}
             onClose={(flag) => onClose(flag)}
         />
-        {/*<SaveLogisticsDrawer open={open} type="add" onClose={(flag) => onClose(true, 'add')} />*/}
-
-        {/*<LocationDetailsDialog*/}
-        {/*    open={openLocationDialog}*/}
-        {/*    data={record}*/}
-        {/*    onClose={() => onClose(false, 'location')}*/}
-        {/*/>*/}
       </Box>
   )
 }

@@ -1,10 +1,10 @@
-import Counter from './counter';
+import Anti from './anti';
 import Weather from './weather';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
 
 export const earlyRoutes = [
   {
-    path: 'project',
+    path: 'warn',
     handle: {
       hideSide: false,
       title: '预警管理',
@@ -21,8 +21,8 @@ export const earlyRoutes = [
         }
       },
       {
-        path: 'ups',
-        Component: Counter,
+        path: 'anti',
+        Component: Anti,
         handle: {
           hideSide: false,
           title: '反制预警',

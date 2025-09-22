@@ -13,7 +13,7 @@ const initialState = {
   status: '1',
   route_name: '',
   remark: '',
-  expect_complete_time: 1,
+  expect_complete_time: '1',
   points: []
 }
 
@@ -44,6 +44,7 @@ const SaveRouteDrawer = props => {
         routeId: data.id,
         remark: data.remark,
         status: data.status,
+        expect_complete_time: data.expect_complete_time,
       }
       reset(params)
     }

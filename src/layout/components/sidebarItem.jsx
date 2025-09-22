@@ -21,8 +21,6 @@ const SidebarItem = ({list = []}) => {
 
   const { openSidebar } = useSidebar();
 
-  const { userInfo } = useUserStore();
-
   useEffect(() => {
     if (!openSidebar) {
       setOpenMenu({})

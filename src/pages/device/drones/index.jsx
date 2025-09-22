@@ -6,6 +6,7 @@ import CustomImage from '@/components/customImage'
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import PermissionButton from "@/components/permissionButton";
 import SaveDroneDrawer from './components/saveDroneDrawer'
+import HistoryDialog from './components/historyDialog'
 import {getDrones, getOperators, deleteDrone, dispatch, dispatchBatch} from '@/services'
 import {droneStatusFilter} from '@/filters';
 import {message} from "@/utils";
@@ -65,7 +66,7 @@ const Drones = () => {
                 module="device"
                 page="drones"
                 action="read"
-                onClick={() => onAction('read', params.row)}>
+                onClick={() => onAction('history', params.row)}>
               历史记录
             </PermissionButton>
             <PermissionButton
@@ -198,17 +199,21 @@ const Drones = () => {
   }
 
   //  添加修改open
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [saveOpen, setSaveOpen] = useState(false);
   const [record, setRecord] = useState(null);
   const [type, setType] = useState('add');
   const onAction = (type, row) => {
-
     setRecord(row ? row : null)
     if (['dispatch', 'dispatchBatch'].includes(type)) {
-      handleDispatch(type, row.id)
+      handleDispatch(type, row ? row.id : null)
     } else {
       setType(type)
-      setSaveOpen(true)
+      if (type === 'history') {
+        setHistoryOpen(true)
+      } else {
+        setSaveOpen(true)
+      }
     }
   };
 
@@ -217,7 +222,11 @@ const Drones = () => {
     if (flag) {
       fetchDrone(searchParams.page)
     }
-    setSaveOpen(false)
+    if (type === 'history') {
+      setHistoryOpen(false)
+    } else {
+      setSaveOpen(false)
+    }
   }
 
   //  无人机集合
@@ -225,6 +234,16 @@ const Drones = () => {
   const changeSelectionModal = (type, rows) => {
     setSelectionModel(rows)
   }
+
+  const selectedVehicleIds = useMemo(() => {
+    const { type, ids } = selectionModel;
+    if (type === 'include') {
+      return data.filter((item) => ids.has(item.id)).map((item) => item.id)
+    } else if (type === 'exclude') {
+      return data.filter((item) => !ids.has(item.id)).map((item) => item.id);
+    }
+    return [];
+  }, [selectionModel])
 
   //  无人机调度
   const [loadings, setLoadings] = useState({
@@ -255,7 +274,7 @@ const Drones = () => {
   const onDispatchBatch = () => {
     if (loadings.allDispatch) return;
     setLoadings({ allDispatch: true })
-    dispatchBatch({ ids: Array.from(selectionModel.ids) }).then(res => {
+    dispatchBatch({ ids: selectedVehicleIds }).then(res => {
       if (res.code === 0) {
         message.success(res.message)
         fetchDrone()
@@ -320,7 +339,7 @@ const Drones = () => {
             page="drones"
             action="dispatch"
             loading={loadings.allDispatch}
-            disabled={selectionModel.ids.size === 0}
+            disabled={selectedVehicleIds.length === 0}
             onClick={() => onAction('dispatchBatch', null)}>
           一键调度
         </PermissionButton>
@@ -351,6 +370,12 @@ const Drones = () => {
           data={ record }
           type={type}
           onClose={ (flag) => onClose('save', flag) }
+      />
+
+      <HistoryDialog
+          data={ record }
+          open={historyOpen}
+          onClose={(flag) => onClose('history', flag)}
       />
     </Box>
   )

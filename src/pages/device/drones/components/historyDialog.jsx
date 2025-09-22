@@ -4,8 +4,8 @@ import CustomDialog from '@/components/CustomDialog/index.jsx'
 import CustomPagination from '@/components/customPagination/index.jsx'
 import {renderCellExpand} from '@/components/CustomCellExpand/index.jsx'
 import CustomTable from "@/components/customTable/index.js";
-import {renderEmptyFilter, dispatchStatusFilter} from '@/filters/index.js'
-import {getVehicleControlHistory} from '@/services/index.js'
+import {renderEmptyFilter} from '@/filters/index.js'
+import {droneHistory} from '@/services/index.js'
 import {coverDateString} from '@/utils/index.js'
 
 
@@ -16,20 +16,22 @@ const ControlHistoryDialog = (props) => {
   const handleClose = () => {
     onClose(false)
   }
-
-  const {DISPATCH_STATUS_OPTIONS, renderDispatchStatus} = dispatchStatusFilter()
   const getColumn = () => {
     return [
-      { headerName: '车辆名称', field: 'vehicle_alias', flex: 1, minWidth: 150 },
+      { headerName: '无人机名称', field: 'drone_name', flex: 1, minWidth: 150, renderCell: () => data.drone_name },
       {
-        headerName: '任务调度状态',
-        field: 'dispatch_status',
+        headerName: '飞行速度（米/秒）',
+        field: 'speed',
         flex: 1,
         minWidth: 150,
-        renderCell: (params) => {
-          return renderDispatchStatus( params.value)
-        },
-        valueOptions: DISPATCH_STATUS_OPTIONS,
+        renderCell: renderCellExpand
+      },
+      {
+        headerName: '飞行高度（米）',
+        field: 'altitude',
+        flex: 1,
+        minWidth: 150,
+        renderCell: renderCellExpand
       },
       {
         headerName: '路线名称',
@@ -52,27 +54,18 @@ const ControlHistoryDialog = (props) => {
         }
       },
       {
-        headerName: '司机信息',
-        field: 'drivers',
+        headerName: '飞手',
+        field: 'operator_name',
         flex: 2,
         minWidth: 150,
-        renderCell: (params) => {
-          return (
-              <Box component="div" sx={{ display: 'flex', flexDirection: 'column', justifyContent: 'center',  height: '100%' }}>
-                {
-                  (params.value || []).map((item, index) => (
-                      <Typography
-                          key={index}
-                          component="p"
-                          variant="body2"
-                          sx={{ lineHeight: 1.4 }}>
-                        {item.name}: {item.phone}
-                      </Typography>
-                  ))
-                }
-              </Box>
-          )
-        },
+        renderCell: renderCellExpand
+      },
+      {
+        headerName: '设备状态',
+        field: 'event_label',
+        flex: 2,
+        minWidth: 150,
+        renderCell: renderCellExpand
       },
     ]
   }
@@ -81,26 +74,27 @@ const ControlHistoryDialog = (props) => {
   const [total, setTotal] = useState(0);
   const [totalPage, setTotalPage] = useState(0);
   const [tableData, setTableData] = useState([]);
-  // const fetchHistory = (p = 1) => {
-  //   const params = {
-  //     page: p,
-  //     pageSize: PAGE_SIZE,
-  //     vehicle_id: data.id,
-  //   }
-  //   getVehicleControlHistory(params).then(({ data, code }) => {
-  //     if (code === 0) {
-  //       setTotalPage(data.totalPages)
-  //       setTotal(data.total)
-  //       setTableData(data.data)
-  //     }
-  //   })
-  // }
-  //
-  // useEffect(() => {
-  //   if (open) {
-  //     fetchHistory()
-  //   }
-  // }, [open])
+  const fetchHistory = (p = 1) => {
+    const params = {
+      page: p,
+      pageSize: PAGE_SIZE,
+      droneId: data.id,
+      operatorId: data.operator_id,
+    }
+    droneHistory(params).then(({ data, code }) => {
+      if (code === 0) {
+        setTotalPage(data.totalPages)
+        setTotal(data.total)
+        setTableData(data.data)
+      }
+    })
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchHistory()
+    }
+  }, [open])
   //  分页
   const savePage = (page) => {
     setPage(page)
@@ -111,7 +105,7 @@ const ControlHistoryDialog = (props) => {
       <CustomTable
           column={getColumn()}
           tableData={tableData}
-          rowKeyProp="batch_id"
+          rowKeyProp="flight_log_id"
           rowHeight={90}
           hideFooter
       />
