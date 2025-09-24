@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import {Box} from '@mui/material';
 import CustomTable from "@/components/customTable";
 import { getRegion } from "@/services";
-import {renderCellExpand} from "@/components/CustomCellExpand/index.jsx";
+import {renderCellExpand} from "@/components/CustomCellExpand";
 
 const Area = () => {
   const getColumn = [

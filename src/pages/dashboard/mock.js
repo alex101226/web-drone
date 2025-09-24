@@ -125,18 +125,18 @@ export const getTaskChartData = (data) => {
   // let gpuCount = 0, usedGpuCount = 0
   // let runningTaskCount = 0, pendingTaskCount = 0
   //
-  // arr.forEach((task) => {
-  //   nodeCount += task.nodes
-  //   usedNodeCount += task.usedNodes
+  // arr.forEach((resource) => {
+  //   nodeCount += resource.nodes
+  //   usedNodeCount += resource.usedNodes
   //
-  //   cpuCount += task.cpuCores
-  //   usedCpuCount += task.usedCpuCores
+  //   cpuCount += resource.cpuCores
+  //   usedCpuCount += resource.usedCpuCores
   //
-  //   gpuCount += task.gpuCards
-  //   usedGpuCount += task.usedGpuCards
+  //   gpuCount += resource.gpuCards
+  //   usedGpuCount += resource.usedGpuCards
   //
-  //   if (task.status === '3') runningTaskCount++   // 运行中
-  //   if (task.status === '4') pendingTaskCount++   // 排队中
+  //   if (resource.status === '3') runningTaskCount++   // 运行中
+  //   if (resource.status === '4') pendingTaskCount++   // 排队中
   // })
 
   //  gpu

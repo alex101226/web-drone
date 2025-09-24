@@ -1,12 +1,8 @@
-import HashrateCpu from './hashrateCpu'
-import HashrateUserManage from './hashrateUserManage'
-import HashrateTaskStatus from './hashrateTaskStatus'
-import HashrateTaskResource from './hashrateTaskResource'
+import Hashrate from './hashrate'
+import Task from './task'
+import Resource from './resource'
 import AccessTimeOutlinedIcon from '@mui/icons-material/AccessTimeOutlined';
-import PersonOutlineOutlinedIcon from '@mui/icons-material/PersonOutlineOutlined';
-import TaskAltOutlinedIcon from '@mui/icons-material/TaskAltOutlined';
-import ExploreOutlinedIcon from '@mui/icons-material/ExploreOutlined';
-import {Navigate} from "react-router";
+
 
 export const dashboardRoutes = [
   {
@@ -19,7 +15,7 @@ export const dashboardRoutes = [
     children: [
       {
         path: 'hashrate',
-        Component: HashrateCpu,
+        Component: Hashrate,
         handle: {
           hideSide: false,
           title: '仪表盘',
@@ -27,7 +23,7 @@ export const dashboardRoutes = [
       },
       {
         path: 'resource',
-        Component: HashrateTaskResource,
+        Component: Resource,
         handle: {
           hideSide: false,
           title: '资源开销',
@@ -35,7 +31,7 @@ export const dashboardRoutes = [
       },
       {
         path: 'task',
-        Component: HashrateTaskStatus,
+        Component: Task,
         handle: {
           hideSide: false,
           title: '任务管理',

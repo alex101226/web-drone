@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {useEffect, useMemo, useState} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Box, Stack, FormControl, FormHelperText, InputLabel, Button,
@@ -6,7 +6,7 @@ import {
 } from '@mui/material';
 import CustomDialog from '@/components/CustomDialog'
 import MapGL3D from '@/components/mapGL3D'
-import { addNest, updateNest, getDict } from '@/services'
+import {addNest, updateNest, getDict, getRegion} from '@/services'
 import {message} from "@/utils";
 
 const InputHelp = styled(FormHelperText)({
@@ -18,7 +18,8 @@ const initialState = {
   capacity: '',
   status: 1,
   longitude: 0,
-  latitude: 0
+  latitude: 0,
+  area: 1
 }
 
 const SaveNestDialog = (props) => {
@@ -33,10 +34,11 @@ const SaveNestDialog = (props) => {
     control,
     reset,
     setValue,
+    watch
   } = useForm({
     defaultValues: initialState
   });
-
+  //  字典
   const [statusOptions, setStatusOptions] = useState([])
   const fetchDict = () => {
     getDict({ type: 'nest_status' }).then((res) => {
@@ -52,15 +54,38 @@ const SaveNestDialog = (props) => {
       }
     })
   }
+
+  const area = watch('area')
+
+  /// 区域接口
+  const [areaOptions, setAreaOptions] = useState([]);
+  const fetchRegion = () => {
+    getRegion().then(res => {
+      if (res.code === 0) {
+        setAreaOptions(res.data)
+      }
+    })
+  }
+
   useEffect(() => {
     if (open) {
       //  等待新的接口
       fetchDict()
+      fetchRegion()
       if (data) {
-        reset({...data});
+        reset({...data, area: 1});
       }
     }
   }, [open]);
+
+  const getCenter = () => {
+    if (areaOptions.length) {
+      return areaOptions.find(item => item.id === area);
+    }
+    return {
+      lng: 113.631900, lat: 34.752900
+    }
+  }
 
   //  关闭按钮
   const handleClose = (flag) => {
@@ -194,10 +219,37 @@ const SaveNestDialog = (props) => {
           )}
       />
 
-      <Box sx={{ height: '300px' }}>
+      <Controller
+          name="area"
+          control={control}
+          render={({ field, fieldState }) => (
+              <FormControl fullWidth error={!!fieldState.error} margin="normal">
+                <InputLabel id="status-label">无人机区域</InputLabel>
+                <Select
+                    labelId="area-label"
+                    id="area"
+                    label="无人机区域"
+                    {...field}>
+                  {
+                    areaOptions.map((item) => (
+                        <MenuItem key={item.id} value={item.id}>
+                          { item.name }
+                        </MenuItem>
+                    ))
+                  }
+                </Select>
+                <InputHelp id="status-helper-text">
+                  {fieldState.error?.message}
+                </InputHelp>
+              </FormControl>
+          )}
+      />
+
+      <Box sx={{ height: '500px' }}>
         <MapGL3D
+            center={getCenter()}
             data={data}
-            zoom={16}
+            zoom={ area === 1 ? 10 : 14 }
             tilt={60}
             heading={45}
             savePosition={savePosition}
@@ -208,8 +260,8 @@ const SaveNestDialog = (props) => {
 
   return (
       <CustomDialog
+          maxWidth="md"
           open={open}
-          maxWidth="sm"
           title={type === 'add' ? '添加机巢' : '修改机巢'}
           content={renderContent()}
           actions={renderAction()}

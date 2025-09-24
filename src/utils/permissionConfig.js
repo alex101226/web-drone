@@ -30,4 +30,10 @@ export const rolePermissions = {
       admin: { create: false, update: false, delete: false, read: true },
     },
   },
+  dashboard: {
+    task: {
+      root: { create: true, update: true, delete: true, read: true },
+      admin: { create: false, update: false, delete: false, read: true },
+    },
+  },
 };

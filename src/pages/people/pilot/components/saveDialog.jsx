@@ -2,7 +2,7 @@ import React, {useState, useEffect} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Box, Button, FormControl, FormHelperText, InputLabel,
-  MenuItem, OutlinedInput, Select, styled, Stack
+  MenuItem, OutlinedInput, Select, styled, Stack, Typography
 } from '@mui/material';
 import CustomDialog from '@/components/CustomDialog'
 import CustomCardUpload from '@/components/customCardUpload'
@@ -206,6 +206,7 @@ const SaveDialog = (props) => {
               </FormControl>
           )}
       />
+      <Typography component="div" variant="body2">执照照片</Typography>
       <FormControl error={!!errors.vehicle_photo} margin="normal">
         <CustomCardUpload
             name="operator"

@@ -1,20 +1,21 @@
 import React, {useEffect, useState} from "react";
-import {useForm} from "react-hook-form";
+import {Controller, useForm} from "react-hook-form";
 import {
-  Box, AppBar, Button, Toolbar, Divider, FormControl,
-  FormHelperText, InputLabel, OutlinedInput, styled, Switch, FormControlLabel
+  Box, AppBar, Button, Toolbar, Divider, FormControl, MenuItem, Select, InputAdornment,
+  FormHelperText, InputLabel, OutlinedInput, styled, Switch, FormControlLabel,
 } from "@mui/material";
 import CustomDrawer from "@/components/customDrawer";
 import MapGL3D from '@/components/mapGL3D'
-import { postLogistics, postLogisticsSetting } from '@/services'
-import {message} from "@/utils/index.js";
+import {getRegion, postLogistics, postLogisticsSetting} from '@/services'
+import {message} from "@/utils";
 
 const initialState = {
   status: '1',
   route_name: '',
   remark: '',
   expect_complete_time: '1',
-  points: []
+  points: [],
+  area: 1
 }
 
 const InputHelp = styled(FormHelperText)({
@@ -31,6 +32,7 @@ const SaveRouteDrawer = props => {
     reset,
     setValue,
     watch,
+    control,
   } = useForm({
     defaultValues: initialState,
     mode: 'onChange',
@@ -45,13 +47,40 @@ const SaveRouteDrawer = props => {
         remark: data.remark,
         status: data.status,
         expect_complete_time: data.expect_complete_time,
+        area: data.area,
       }
-      reset(params)
+      reset({ ...params, area: 1 })
     }
   }, [data, open])
 
   const status = watch('status')
   const points = watch('points')
+  const area = watch('area')
+
+  /// 区域接口
+  const [areaOptions, setAreaOptions] = useState([]);
+  const fetchRegion = () => {
+    getRegion().then(res => {
+      if (res.code === 0) {
+        setAreaOptions(res.data)
+      }
+    })
+  }
+
+  const getCenter = () => {
+    if (areaOptions.length) {
+      return areaOptions.find(item => item.id === area);
+    }
+    return {
+      lng: 113.631900, lat: 34.752900
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
+      fetchRegion()
+    }
+  }, [open])
   //  关闭
   const handleClose = (flag) => {
     reset(initialState)
@@ -178,6 +207,7 @@ const SaveRouteDrawer = props => {
                 {...register("expect_complete_time", {
                   required: '请输入预计巡航时间',
                 })}
+                endAdornment={<InputAdornment position="end">小时</InputAdornment>}
             />
             <InputHelp id="expect_complete_time-helper-text">
               {errors.expect_complete_time?.message}
@@ -197,8 +227,41 @@ const SaveRouteDrawer = props => {
               {errors.remark?.message}
             </InputHelp>
           </FormControl>
+
+          <Controller
+              name="area"
+              control={control}
+              render={({ field, fieldState }) => (
+                  <FormControl fullWidth margin="normal">
+                    <InputLabel id="status-label">无人机区域</InputLabel>
+                    <Select
+                        labelId="area-label"
+                        id="area"
+                        label="无人机区域"
+                        value={field.value}
+                        onChange={(newValue) => field.onChange(newValue)}>
+                      {
+                        areaOptions.map((item) => (
+                            <MenuItem key={item.id} value={item.id}>
+                              { item.name }
+                            </MenuItem>
+                        ))
+                      }
+                    </Select>
+                  </FormControl>
+              )}
+          />
+
           <Box sx={{height: '500px'}}>
-            <MapGL3D multiple data={points || []} savePosition={savePosition} />
+            <MapGL3D
+                center={getCenter()}
+                multiple
+                zoom={ area === 1 ? 10 : 14 }
+                tilt={60}
+                heading={45}
+                data={points || []}
+                savePosition={savePosition}
+            />
           </Box>
         </Box>
     )

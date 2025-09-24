@@ -1,15 +1,16 @@
 import {useState, useEffect} from 'react';
-import {Box} from '@mui/material'
+import {Box, Autocomplete, Stack, TextField, Typography} from '@mui/material'
 import CustomTable from '@/components/customTable'
 import CustomPagination from '@/components/customPagination'
 import PermissionButton from '@/components/permissionButton'
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import SaveUserDialog from './components/saveUserDialog'
-import { useUserStore } from '@/store'
-import {getHashrateUser} from '@/services';
+import {getHashrateUser, getRoles} from '@/services';
 import {userStatusFilter} from '@/filters';
 import { coverDateString } from '@/utils'
 
+
+const PAGE_SIZE = 10
 const PeoplePosition = () => {
 
   const {USER_STATUS_OPTIONS, renderUserStatus} = userStatusFilter()
@@ -57,15 +58,16 @@ const PeoplePosition = () => {
   }
   const [data, setData] = useState([])
   const [total, setTotal] = useState(0)
-  const [page, setPage] = useState(1)
   const [totalPages, setTotalPages] = useState(0)
+  const [searchParams, setSearchParams] = useState({
+    page: 1,
+    role_id: ''
+  })
 
-  const userInfo = useUserStore(state => state.userInfo)
-  const fetchUser = (p = 1) => {
+  const fetchUser = () => {
     const params = {
-      page: p,
-      pageSize: 5,
-      role_id: userInfo.role_id
+      ...searchParams,
+      pageSize: PAGE_SIZE
     }
     getHashrateUser(params).then((res) => {
       if (res.code === 0) {
@@ -76,14 +78,36 @@ const PeoplePosition = () => {
     })
   }
 
+  //  获取角色列表
+  const [roleOptions, setRoleOptions] = useState([]);
+  const fetchRoles = () => {
+    getRoles().then((res) => {
+      if (res.code === 0) {
+        setRoleOptions(res.data)
+      }
+    })
+  }
+
   useEffect(() => {
-    fetchUser()
+    fetchRoles()
   }, [])
 
+  useEffect(() => {
+    fetchUser()
+  }, [searchParams])
   //  分页
   const savePage = (page) => {
-    setPage(page)
-    fetchUser(page)
+    setSearchParams({ ...searchParams, page })
+  }
+
+  //  飞手
+  const handleSearch = (event, row) => {
+    setSearchParams({ ...searchParams, role_id: row.id})
+  }
+
+  //  重置
+  const resetSearch = () => {
+    setSearchParams({ ...searchParams, role_id: '' })
   }
 
   const [saveOpen, setSaveOpen] = useState(false);
@@ -99,16 +123,11 @@ const PeoplePosition = () => {
   };
 
   //  关闭
-  const onClose = (type) => (flag) => {
-    switch (type) {
-      case 'save':
-        if (flag) {
-          fetchUser(page)
-        }
-        setSaveOpen(false)
-        break;
+  const onClose = (flag) => {
+    if (flag) {
+      fetchUser()
     }
-
+    setSaveOpen(false)
   }
 
   return (
@@ -116,6 +135,35 @@ const PeoplePosition = () => {
         <PermissionButton module="people" page="manager" action="create" onClick={onEdit(null)}>
           创建用户
         </PermissionButton>
+        <Stack spacing={2} direction="row" alignItems="center" sx={{my: 2}}>
+          <Typography component="p" variant="p">选择角色：</Typography>
+          <Autocomplete
+              freeSolo
+              disableClearable
+              sx={{ width: 300 }}
+              options={roleOptions}
+              getOptionKey={(option) => option.id}
+              getOptionLabel={(option) => option.role_description || ''}
+              isOptionEqualToValue={(option, value) => option.id === value.id}
+              onChange={handleSearch}
+              onInputChange={resetSearch}
+              renderInput={(params) => (
+                  <TextField
+                      {...params}
+                      size="small"
+                      label=""
+                      placeholder="请选择角色"
+                      slotProps={{
+                        input: {
+                          ...params.InputProps,
+                          type: 'search',
+                        },
+                      }}
+                  />
+              )}
+          />
+        </Stack>
+
         <Box sx={{ height: 'calc(100vh - 250px)', mt: 2 }}>
           <CustomTable
               tableData={data}
@@ -126,8 +174,8 @@ const PeoplePosition = () => {
         </Box>
         <CustomPagination
             total={total}
-            pageSize={5}
-            page={page}
+            pageSize={PAGE_SIZE}
+            page={searchParams.page}
             totalPage={totalPages}
             savePage={savePage}
         />
@@ -135,22 +183,8 @@ const PeoplePosition = () => {
             open={ saveOpen }
             type={type}
             data={ record }
-            roleId={2}
-            onClose={ (flag) => onClose('save')(flag)}
+            onClose={ (flag) => onClose(flag)}
         />
-        {/*<PeopleSave*/}
-        {/*    open={ saveOpen }*/}
-        {/*    type={type}*/}
-        {/*    onClose={ (flag) => onClose('save')(flag) }*/}
-        {/*    data={ record }*/}
-        {/*/>*/}
-        {/*<CheckInfo*/}
-        {/*    labelText="人员位置"*/}
-        {/*    open={checkOpen}*/}
-        {/*    onClose={ () => onClose('check')(false) }*/}
-        {/*    text={ record.value }*/}
-        {/*    title="查看人员信息"*/}
-        {/*/>*/}
       </Box>
   )
 }

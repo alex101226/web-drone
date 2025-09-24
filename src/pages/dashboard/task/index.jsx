@@ -3,20 +3,15 @@ import {Box, Button} from '@mui/material'
 import CustomTable from '@/components/customTable'
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import CustomPagination from '@/components/customPagination'
+import PermissionButton from "@/components/permissionButton";
 import DetailsDrawer from './components/detailsDrawer'
 import CreateTaskDrawer from './components/createTaskDrawer'
 import { hashRateFilter, renderEmptyFilter} from '@/filters';
-import { useUserStore } from '@/store'
 import { getTasks } from '@/services'
 import {coverDateString} from "@/utils/index.js";
 
 const PAGE_SIZE = 10;
 const HashrateTaskStatus = () => {
-  const { userInfo } = useUserStore()
-
-  const isRoot = () => {
-    return userInfo?.role_name === 'root'
-  }
   const {TASK_STATUS_OPTIONS, renderTaskStatus} = hashRateFilter()
   const getColumn = [
     { headerName: '序号', field: 'id', minWidth: 80, flex: 1 },
@@ -135,15 +130,16 @@ const HashrateTaskStatus = () => {
   }
   return (
       <Box>
-        {
-          isRoot() && <Button variant="contained" onClick={handleAdd} sx={{ marginBottom: '20px' }}>
-              创建任务
-            </Button>
-        }
-        <Box sx={{ height: 'calc(100vh - 250px)' }}>
+        <PermissionButton
+            module="dashboard"
+            page="task"
+            action="create"
+            onClick={handleAdd}>
+          创建任务
+        </PermissionButton>
+        <Box sx={{ height: 'calc(100vh - 220px)', mt: 2 }}>
           <CustomTable rowKeyProp="id" columns={getColumn} tableData={rows} hideFooter />
         </Box>
-
 
         <CustomPagination
             page={page}

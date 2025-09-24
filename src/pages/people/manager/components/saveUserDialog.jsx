@@ -32,7 +32,7 @@ const InputHelp = styled(FormHelperText)({
 })
 
 const SaveUserDialog = (props) => {
-  const { open, onClose, data, type, roleId } = props
+  const { open, onClose, data, type } = props
   const {USER_STATUS_OPTIONS, renderUserStatus} = userStatusFilter()
   const {
     register,
@@ -68,13 +68,9 @@ const SaveUserDialog = (props) => {
   const [loading, setLoading] = useState(false);
   //  执行添加
   const onAdd = (data) => {
-    const params = {
-      ...data,
-      role_id: roleId
-    }
     if (loading) return;
     setLoading(true)
-    addUser(params).then(res => {
+    addUser(data).then(res => {
       if (res.code === 0) {
         message.success('添加成功')
         handleClose(true)
@@ -82,9 +78,9 @@ const SaveUserDialog = (props) => {
         message.error('添加失败')
       }
       setLoading(false)
-    }).catch(() => {
+    }).catch((err) => {
       setLoading(false)
-      message.error('添加失败')
+      message.error('添加失败', err)
     })
   }
 

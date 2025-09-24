@@ -13,7 +13,7 @@ import { Box } from "@mui/material";
  */
 export default function MapGL3D(props) {
   const {
-    center = { lng: 116.404, lat: 39.915 },
+    center = { lat: 34.752900, lng: 113.631900 },
     zoom = 15,
     tilt = 73,
     heading = 64.5,
@@ -29,7 +29,7 @@ export default function MapGL3D(props) {
   const bMapRef = useRef(null);         // BMapGL 命名空间
   const mapInsRef = useRef(null);       // 地图实例
   const geocoderRef = useRef(null);     // 地址解析对象
-  const markersRef = useRef(new Map()); // 存放 marker（id -> marker）
+  const pointMarkersRef = useRef(new Map()); // 存放 marker（id -> marker）
   const routePointsRef = useRef([]);    // 路径点数组 [{id, lng, lat, name, address}]
   const polylineRef = useRef(null);     // 折线覆盖物
   const tileLayerRef = useRef(null);    // 自定义图层
@@ -88,7 +88,7 @@ export default function MapGL3D(props) {
    */
   const refreshMarkerIcons = (bMap) => {
     routePointsRef.current.forEach((p, idx) => {
-      const marker = markersRef.current.get(p.id);
+      const marker = pointMarkersRef.current.get(p.id);
       if (marker) {
         const icon = createNumberIcon(bMap, idx + 1);
         marker.setIcon(icon);
@@ -98,10 +98,10 @@ export default function MapGL3D(props) {
 
   // 删除某个点
   const removePoint = (bMap, map, id) => {
-    const marker = markersRef.current.get(id);
+    const marker = pointMarkersRef.current.get(id);
     if (marker) {
       map.removeOverlay(marker);
-      markersRef.current.delete(id);
+      pointMarkersRef.current.delete(id);
     }
     routePointsRef.current = routePointsRef.current.filter(p => p.id !== id);
     redrawPolyline(bMap, map);
@@ -113,7 +113,7 @@ export default function MapGL3D(props) {
 
   /**
    * 为点创建 marker 并绑定事件（右键删除、拖拽更新）
-   * 注意：markersRef 存储的是 { marker, label }
+   * 注意：pointMarkersRef 存储的是 { marker, label }
    */
   const createMarkerForPoint = (bMap, map, pointObj, index) => {
     const pt = new bMap.Point(pointObj.lng, pointObj.lat);
@@ -138,9 +138,8 @@ export default function MapGL3D(props) {
     marker.addEventListener('rightclick', () => {
       removePoint(bMap, map, pointObj.id);
     });
-
     map.addOverlay(marker);
-    markersRef.current.set(pointObj.id, marker);
+    pointMarkersRef.current.set(pointObj.id, marker);
   };
 
   // 添加新点（地图点击时调用，multiple 模式）
@@ -181,11 +180,15 @@ export default function MapGL3D(props) {
     });
   };
 
+  //  膝盖覆盖物和中心点
   const setMarker = () => {
     const map = mapInsRef.current
     if (!map) return;
+
     const bMap = bMapRef.current;
+
     const point = new bMap.Point(center.lng, center.lat)
+
     map.centerAndZoom(point, zoom);
     // 复用 marker
     if (!centerMarkerRef.current) {
@@ -260,6 +263,7 @@ export default function MapGL3D(props) {
         map.setHeading(heading);
         map.setTilt(tilt);
         setMarker()
+
         // 自定义图层
         const isTilesPng = true;
         const ts = 'pl';
@@ -288,8 +292,7 @@ export default function MapGL3D(props) {
 
         // 初始数据处理
         if (multiple) {
-          // 如果传入了点数组，先渲染出来
-          initMultiple(bMap, map);
+          initMultiple(bMap, map)
         } else {
           initSingle(bMap, map);
         }
@@ -305,10 +308,10 @@ export default function MapGL3D(props) {
         const map = mapInsRef.current;
         if (map && bMapRef.current) {
           // 移除所有 marker
-          markersRef.current.forEach(mk => {
+          pointMarkersRef.current.forEach(mk => {
             try { map.removeOverlay(mk); } catch (e) {}
           });
-          markersRef.current.clear();
+          pointMarkersRef.current.clear();
           // 移除折线
           if (polylineRef.current) {
             try { map.removeOverlay(polylineRef.current); } catch (e) {}
@@ -328,9 +331,12 @@ export default function MapGL3D(props) {
     };
   }, []); // 只在组件挂载时执行一次
 
+  //  更新标注点
   useEffect(() => {
-    setMarker()
-  }, [center]);
+    if (mapInsRef.current) {
+      setMarker()
+    }
+  }, [center])
 
   return <Box
       ref={mapRef}
