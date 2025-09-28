@@ -88,6 +88,16 @@ export const taskStats = async (params) => {
   return await http.get(`/taskStats`)
 }
 
+//  获取可选区域数据  availableArea
+export const availableArea = async (params) => {
+  return await http.get(`/availableArea?page=${params.page}&pageSize=${params.pageSize}`)
+}
+
+//  添加可选区域   addArea
+export const addArea = async (data) => {
+  return await http.post('/addArea', data)
+}
+
 //  获取所有路线
 export const getLocations = async () => {
   return await http.get('/getLocations')

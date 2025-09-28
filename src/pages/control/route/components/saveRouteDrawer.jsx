@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, {Fragment, useEffect, useMemo, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
 import {
   Box, AppBar, Button, Toolbar, Divider, FormControl, MenuItem, Select, InputAdornment,
@@ -6,7 +6,7 @@ import {
 } from "@mui/material";
 import CustomDrawer from "@/components/customDrawer";
 import MapGL3D from '@/components/mapGL3D'
-import {getRegion, postLogistics, postLogisticsSetting} from '@/services'
+import {availableArea, postLogistics, postLogisticsSetting} from '@/services'
 import {message} from "@/utils";
 
 const initialState = {
@@ -24,6 +24,18 @@ const InputHelp = styled(FormHelperText)({
 const SaveRouteDrawer = props => {
   const { open, onClose, type, data } = props;
   const isAdd = () =>  type === 'add';
+
+  const getTitle = () => {
+    switch (type) {
+      case 'update':
+        return '修改路线'
+      case 'read':
+        return '查看路线'
+      default:
+      case 'add':
+        return '添加路线'
+    }
+  }
 
   const {
     register,
@@ -49,7 +61,7 @@ const SaveRouteDrawer = props => {
         expect_complete_time: data.expect_complete_time,
         area: data.area,
       }
-      reset({ ...params, area: 1 })
+      reset({ ...params })
     }
   }, [data, open])
 
@@ -60,21 +72,39 @@ const SaveRouteDrawer = props => {
   /// 区域接口
   const [areaOptions, setAreaOptions] = useState([]);
   const fetchRegion = () => {
-    getRegion().then(res => {
+    const params = {
+      page: 1,
+      pageSize: 100,
+    }
+    availableArea(params).then(res => {
       if (res.code === 0) {
-        setAreaOptions(res.data)
+        setAreaOptions(res.data.data)
       }
     })
   }
 
-  const getCenter = () => {
-    if (areaOptions.length) {
-      return areaOptions.find(item => item.id === area);
+  const currentArea = useMemo(() => {
+    if (areaOptions.length > 0) {
+      const find = areaOptions.find((item) => item.id === area);
+      const data = find || areaOptions[0]
+      return {
+        center: {
+          lng: data.center_lng,
+          lat: data.center_lat
+        },
+        radius: data.radius
+      }
     }
+
     return {
-      lng: 113.631900, lat: 34.752900
+      center: {
+        lng: 113.631900,
+        lat: 34.752900
+      },
+      radius: 5000
     }
-  }
+  }, [area, areaOptions])
+
 
   useEffect(() => {
     if (open) {
@@ -136,30 +166,6 @@ const SaveRouteDrawer = props => {
     }
   }
 
-  //  底部按钮
-  const renderActions = () => {
-    return (
-        <AppBar
-            elevation={0}
-            component="nav"
-            sx={{ position: 'sticky', width: '100%', bottom: '0', left: '0'}}>
-          <Divider />
-          <Toolbar sx={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <Button variant="outlined" onClick={() => handleClose(false)}>
-              取消
-            </Button>
-            <Box sx={{ml: 2}} />
-            <Button
-                loading={loading}
-                variant="contained"
-                onClick={handleSubmit(onSubmit)}>
-              保存
-            </Button>
-          </Toolbar>
-        </AppBar>
-    )
-  }
-
   //  查看地图
   const savePosition = (data) => {
     setValue('points', data)
@@ -169,10 +175,10 @@ const SaveRouteDrawer = props => {
     const value = event.target.checked
     setValue('status', value ? '1' : '0')
   }
-  //  内容
-  const renderContent = () => {
+
+  const renderActionContent = () => {
     return (
-        <Box component="form" sx={{ flex: 1 }}>
+        <Fragment>
           <FormControl fullWidth error={!!errors.route_name} margin="normal">
             <InputLabel htmlFor="route_name">路线名称</InputLabel>
             <OutlinedInput
@@ -233,17 +239,18 @@ const SaveRouteDrawer = props => {
               control={control}
               render={({ field, fieldState }) => (
                   <FormControl fullWidth margin="normal">
-                    <InputLabel id="status-label">无人机区域</InputLabel>
+                    <InputLabel id="area-label">区域范围</InputLabel>
                     <Select
                         labelId="area-label"
                         id="area"
-                        label="无人机区域"
+                        label="区域范围"
                         value={field.value}
+                        disabled={!isAdd()}
                         onChange={(newValue) => field.onChange(newValue)}>
                       {
                         areaOptions.map((item) => (
                             <MenuItem key={item.id} value={item.id}>
-                              { item.name }
+                              { item.zone_name }
                             </MenuItem>
                         ))
                       }
@@ -251,14 +258,24 @@ const SaveRouteDrawer = props => {
                   </FormControl>
               )}
           />
+        </Fragment>
+    )
+  }
+  //  内容
+  const renderContent = () => {
+    return (
+        <Box component="form" sx={{ flex: 1 }}>
+          { type !== 'read' ? renderActionContent() : null}
 
-          <Box sx={{height: '500px'}}>
+          <Box sx={{height: type !== 'read' ? '500px' : 'calc(100vh - 128px)'}}>
             <MapGL3D
-                center={getCenter()}
+                center={currentArea.center}
+                radius={currentArea.radius}
                 multiple
-                zoom={ area === 1 ? 10 : 14 }
+                zoom={ 14 }
                 tilt={60}
                 heading={45}
+                disabled={type === 'read'}
                 data={points || []}
                 savePosition={savePosition}
             />
@@ -266,10 +283,37 @@ const SaveRouteDrawer = props => {
         </Box>
     )
   }
+
+  //  底部按钮
+  const renderActions = () => {
+    return (
+        type !== 'read'
+        ? <AppBar
+                elevation={0}
+                component="nav"
+                sx={{ position: 'sticky', width: '100%', bottom: '0', left: '0'}}>
+              <Divider />
+              <Toolbar sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                <Button variant="outlined" onClick={() => handleClose(false)}>
+                  取消
+                </Button>
+                <Box sx={{ml: 2}} />
+                <Button
+                    loading={loading}
+                    variant="contained"
+                    onClick={handleSubmit(onSubmit)}>
+                  保存
+                </Button>
+              </Toolbar>
+            </AppBar>
+            : null
+    )
+  }
+
   return (
       <CustomDrawer
           open={open}
-          title={isAdd() ? '添加路线' : '修改路线'}
+          title={getTitle()}
           w={100}
           onClose={() => handleClose(false)}
           anchor="top"

@@ -1,5 +1,5 @@
-import {useState, useEffect, useCallback} from 'react';
-import {Box, Autocomplete, Stack, TextField, Typography} from '@mui/material'
+import {useState, useEffect} from 'react';
+import {Box, Autocomplete, Stack, TextField, Typography, Button} from '@mui/material'
 import { locationStatusFilter, routeUsedStatusFilter } from '@/filters/index.js';
 import CustomTable from "@/components/customTable/index.js";
 import CustomPagination from '@/components/customPagination/index';
@@ -58,7 +58,9 @@ const CarLogisticsRoute = () => {
                 onClick={onAction('update', params.row)}>
               修改
             </PermissionButton>
-
+            <Button type="text" onClick={onAction('read', params.row)}>
+              查看
+            </Button>
           </Box>
         }
       },

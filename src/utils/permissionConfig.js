@@ -29,6 +29,10 @@ export const rolePermissions = {
       root: { create: true, update: true, delete: true, read: true },
       admin: { create: false, update: false, delete: false, read: true },
     },
+    area: {
+      root: { create: true, update: true, delete: true, read: true },
+      admin: { create: false, update: false, delete: false, read: true },
+    },
   },
   dashboard: {
     task: {

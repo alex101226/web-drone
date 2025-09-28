@@ -1,5 +1,5 @@
 import {useState, useEffect} from 'react';
-import {Box} from '@mui/material'
+import {Box, Button} from '@mui/material'
 import { renderCellExpand } from '@/components/CustomCellExpand'
 import { nestStatusFilter } from '@/filters';
 import CustomTable from "@/components/customTable";
@@ -76,14 +76,19 @@ const Nest = () => {
       field: 'actions',
       flex: 1, minWidth: 200,
       renderCell: ({ row }) => {
-        return <PermissionButton
-            module="device"
-            page="nest"
-            action="update"
-            type="text"
-            onClick={() => handleAction(row, 'update')}>
-          修改
-        </PermissionButton>
+        return <Box>
+          <PermissionButton
+              module="device"
+              page="nest"
+              action="update"
+              type="text"
+              onClick={() => handleAction(row, 'update')}>
+            修改
+          </PermissionButton>
+          <Button type="text" onClick={() => handleAction(row, 'read')}>
+            查看
+          </Button>
+        </Box>
       }
     }
   ]
@@ -99,7 +104,6 @@ const Nest = () => {
     setOpen(true)
   }
   const onClose = (flag) => {
-    console.log('修改成功后，查看传回来的参数', flag)
     if (flag) {
       fetchNest(page)
     }

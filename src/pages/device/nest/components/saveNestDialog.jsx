@@ -1,13 +1,13 @@
-import React, {useEffect, useMemo, useState} from 'react';
+import React, {Fragment, useEffect, useMemo, useState} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
-  Box, Stack, FormControl, FormHelperText, InputLabel, Button,
-  MenuItem, OutlinedInput, Select, styled
+  Box, FormControl, FormHelperText, InputLabel, Button, Toolbar,
+  MenuItem, OutlinedInput, Select, styled, AppBar, Divider,
 } from '@mui/material';
-import CustomDialog from '@/components/CustomDialog'
 import MapGL3D from '@/components/mapGL3D'
-import {addNest, updateNest, getDict, getRegion} from '@/services'
+import {addNest, updateNest, getDict, availableArea} from '@/services'
 import {message} from "@/utils";
+import CustomDrawer from "@/components/customDrawer/index.jsx";
 
 const InputHelp = styled(FormHelperText)({
   height: '20px'
@@ -27,6 +27,18 @@ const SaveNestDialog = (props) => {
   const { open, onClose, data, type } = props;
 
   const isAdd = () => type === 'add';
+
+  const getTitle = () => {
+    switch (type) {
+      case 'update':
+        return '修改机巢'
+      case 'read':
+        return '查看机巢位置'
+      default:
+      case 'add':
+        return '添加机巢'
+    }
+  }
   const {
     register,
     handleSubmit,
@@ -60,9 +72,13 @@ const SaveNestDialog = (props) => {
   /// 区域接口
   const [areaOptions, setAreaOptions] = useState([]);
   const fetchRegion = () => {
-    getRegion().then(res => {
+    const params = {
+      page: 1,
+      pageSize: 100,
+    }
+    availableArea(params).then(res => {
       if (res.code === 0) {
-        setAreaOptions(res.data)
+        setAreaOptions(res.data.data)
       }
     })
   }
@@ -73,19 +89,32 @@ const SaveNestDialog = (props) => {
       fetchDict()
       fetchRegion()
       if (data) {
-        reset({...data, area: 1});
+        reset({...data});
       }
     }
   }, [open]);
 
-  const getCenter = () => {
-    if (areaOptions.length) {
-      return areaOptions.find(item => item.id === area);
+  const currentArea = useMemo(() => {
+    if (areaOptions.length > 0) {
+      const find = areaOptions.find((item) => item.id === area);
+      const data = find || areaOptions[0]
+      return {
+        center: {
+          lng: data.center_lng,
+          lat: data.center_lat
+        },
+        radius: data.radius
+      }
     }
+
     return {
-      lng: 113.631900, lat: 34.752900
+      center: {
+        lng: 113.631900,
+        lat: 34.752900
+      },
+      radius: 5000
     }
-  }
+  }, [area, areaOptions])
 
   //  关闭按钮
   const handleClose = (flag) => {
@@ -130,8 +159,8 @@ const SaveNestDialog = (props) => {
   //  获取定位
   const savePosition = (position) => {
     reset({
-      longitude: position.point.lng,
-      latitude: position.point.lat,
+      longitude: position.lng,
+      latitude: position.lat,
     }, {
       keepDirty: true,     // 保留已改动的字段状态
       keepErrors: true,    // 保留错误
@@ -150,121 +179,145 @@ const SaveNestDialog = (props) => {
 
   //  底部
   const renderAction = () => {
-    return <Stack spacing={2} direction="row">
-      <Button variant="outlined" onClick={() => handleClose(false)}>
-        关闭
-      </Button>
-      <Button variant="contained" onClick={handleSubmit(onSubmit)} loading={loading}>
-        保存
-      </Button>
-    </Stack>
+    return type !== 'read' ?
+        <AppBar
+            elevation={0}
+            component="nav"
+            sx={{ position: 'sticky', width: '100%', bottom: '0', left: '0'}}>
+          <Divider />
+          <Toolbar sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+            <Button variant="outlined" onClick={() => handleClose(false)}>
+              取消
+            </Button>
+            <Box sx={{ml: 2}} />
+            <Button
+                loading={loading}
+                variant="contained"
+                onClick={handleSubmit(onSubmit)}>
+              保存
+            </Button>
+          </Toolbar>
+        </AppBar> : null
   }
 
+  const renderActionContent = () => {
+    return (
+        <Fragment>
+          <FormControl fullWidth error={!!errors.nest_name} margin="normal">
+            <InputLabel htmlFor="nest_name">机巢名称</InputLabel>
+            <OutlinedInput
+                label="机巢名称"
+                id="nest_name"
+                aria-describedby="nest_name-helper-text"
+                {...register("nest_name", {
+                  required: '请输入机巢名称',
+                })}
+            />
+            <InputHelp id="nest_name-helper-text">
+              {errors.nest_name?.message}
+            </InputHelp>
+          </FormControl>
+          <FormControl fullWidth error={!!errors.capacity} margin="normal">
+            <InputLabel htmlFor="capacity">无人机限制数量</InputLabel>
+            <OutlinedInput
+                {...register("capacity", {
+                  required: '请输入无人机限制数量',
+                })}
+                label="无人机限制数量"
+                id="capacity"
+                aria-describedby="capacity-helper-text"
+            />
+            <InputHelp id="capacity-helper-text">
+              {errors.capacity?.message}
+            </InputHelp>
+          </FormControl>
+          <Controller
+              name="status"
+              control={control}
+              rules={{ required: '请选择机巢状态' }}
+              render={({ field, fieldState }) => (
+                  <FormControl fullWidth error={!!fieldState.error} margin="normal">
+                    <InputLabel id="status-label">机巢状态</InputLabel>
+                    <Select
+                        labelId="status-label"
+                        id="status"
+                        label="机巢状态"
+                        disabled={isAdd()}
+                        {...field}>
+                      {
+                        statusOptions.map((item) => (
+                            <MenuItem key={item.sort} value={item.sort}>
+                              { item.dict_label }
+                            </MenuItem>
+                        ))
+                      }
+                    </Select>
+                    <InputHelp id="status-helper-text">
+                      {fieldState.error?.message}
+                    </InputHelp>
+                  </FormControl>
+              )}
+          />
+
+          <Controller
+              name="area"
+              control={control}
+              render={({ field, fieldState }) => (
+                  <FormControl fullWidth error={!!fieldState.error} margin="normal">
+                    <InputLabel id="area-label">区域范围</InputLabel>
+                    <Select
+                        labelId="area-label"
+                        id="area"
+                        label="区域范围"
+                        disabled={!isAdd()}
+                        {...field}>
+                      {
+                        areaOptions.map((item) => (
+                            <MenuItem key={item.id} value={item.id}>
+                              { item.zone_name }
+                            </MenuItem>
+                        ))
+                      }
+                    </Select>
+                    <InputHelp id="status-helper-text">
+                      {fieldState.error?.message}
+                    </InputHelp>
+                  </FormControl>
+              )}
+          />
+        </Fragment>
+    )
+  }
   //  内容
   const renderContent = () => {
     return <Box component="form">
-      <FormControl fullWidth error={!!errors.nest_name} margin="normal">
-        <InputLabel htmlFor="nest_name">机巢名称</InputLabel>
-        <OutlinedInput
-            label="机巢名称"
-            id="nest_name"
-            aria-describedby="nest_name-helper-text"
-            {...register("nest_name", {
-              required: '请输入机巢名称',
-            })}
-        />
-        <InputHelp id="nest_name-helper-text">
-          {errors.nest_name?.message}
-        </InputHelp>
-      </FormControl>
-      <FormControl fullWidth error={!!errors.capacity} margin="normal">
-        <InputLabel htmlFor="capacity">无人机限制数量</InputLabel>
-        <OutlinedInput
-            {...register("capacity", {
-              required: '请输入无人机限制数量',
-            })}
-            label="无人机限制数量"
-            id="capacity"
-            aria-describedby="capacity-helper-text"
-        />
-        <InputHelp id="capacity-helper-text">
-          {errors.capacity?.message}
-        </InputHelp>
-      </FormControl>
-      <Controller
-          name="status"
-          control={control}
-          rules={{ required: '请选择机巢状态' }}
-          render={({ field, fieldState }) => (
-              <FormControl fullWidth error={!!fieldState.error} margin="normal">
-                <InputLabel id="status-label">机巢状态</InputLabel>
-                <Select
-                    labelId="status-label"
-                    id="status"
-                    label="机巢状态"
-                    disabled={isAdd()}
-                    {...field}>
-                  {
-                    statusOptions.map((item) => (
-                        <MenuItem key={item.sort} value={item.sort}>
-                          { item.dict_label }
-                        </MenuItem>
-                    ))
-                  }
-                </Select>
-                <InputHelp id="status-helper-text">
-                  {fieldState.error?.message}
-                </InputHelp>
-              </FormControl>
-          )}
-      />
+      { type !== 'read' ? renderActionContent() : null}
 
-      <Controller
-          name="area"
-          control={control}
-          render={({ field, fieldState }) => (
-              <FormControl fullWidth error={!!fieldState.error} margin="normal">
-                <InputLabel id="status-label">无人机区域</InputLabel>
-                <Select
-                    labelId="area-label"
-                    id="area"
-                    label="无人机区域"
-                    {...field}>
-                  {
-                    areaOptions.map((item) => (
-                        <MenuItem key={item.id} value={item.id}>
-                          { item.name }
-                        </MenuItem>
-                    ))
-                  }
-                </Select>
-                <InputHelp id="status-helper-text">
-                  {fieldState.error?.message}
-                </InputHelp>
-              </FormControl>
-          )}
-      />
-
-      <Box sx={{ height: '500px' }}>
+      <Box sx={{ height: type !== 'read' ? '500px' : 'calc(100vh - 128px)' }}>
         <MapGL3D
-            center={getCenter()}
+            center={currentArea.center}
+            radius={currentArea.radius}
             data={data}
-            zoom={ area === 1 ? 10 : 14 }
+            zoom={ 14 }
             tilt={60}
             heading={45}
             savePosition={savePosition}
+            mode="nest"
+            disabled={type === 'read'}
         />
       </Box>
     </Box>;
   }
 
   return (
-      <CustomDialog
-          maxWidth="md"
+      <CustomDrawer
+          w={100}
+          anchor="top"
           open={open}
-          title={type === 'add' ? '添加机巢' : '修改机巢'}
-          content={renderContent()}
+          title={getTitle()}
+          children={renderContent()}
           actions={renderAction()}
+          onClose={() => handleClose(false)}
       />
   )
 }
