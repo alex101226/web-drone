@@ -8,18 +8,22 @@ const CustomImage = (props) => {
         alignItems: 'center',
         height: '100%',
       }}>
-        <Box
-            component="img"
-            src={ img ? globalThis.CONSTANTS.STATIC_URL + img : null }
-            alt=""
-            sx={{
-              width: w,
-              height: h,
-              objectFit: fit,
-              borderRadius: radius,
-              backgroundColor: '#ccc',
-            }}
-        />
+        {
+          img
+            ? <Box
+                  component="img"
+                  src={ img ? globalThis.CONSTANTS.STATIC_URL + img : null }
+                  alt=""
+                  sx={{
+                    width: w,
+                    height: h,
+                    objectFit: fit,
+                    borderRadius: radius,
+                    backgroundColor: '#ccc',
+                  }}
+              />
+              : null
+        }
       </Box>
   )
 }

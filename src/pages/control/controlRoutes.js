@@ -1,6 +1,6 @@
 import DriveEtaOutlinedIcon from "@mui/icons-material/DriveEtaOutlined";
 import Route from "@/pages/control/route";
-import Control from "@/pages/control/control";
+import Control from "@/pages/control/dispatch";
 import Area from './area'
 
 export const controlRoutes = [

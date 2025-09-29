@@ -10,7 +10,7 @@ globalThis.CONSTANTS = {
   BASE_URL: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'http://122.51.216.157:4000',
   STATIC_URL: process.env.NODE_ENV === 'development' ? 'http://localhost:4000' : 'http://122.51.216.157：4000',
   LOGO_TITLE: '越泰科技',
-  SYSTEM_NAME: '低空经济管理系统',
+  SYSTEM_NAME: '越泰低空无人机与算力管理系统',
   SYSTEM_LOGO: require('../assets/images/logo-1.svg'),
   //  https://1072558463339856.appflow.aliyunnest.com/webhook/home/b271bff129da247a59cfcb099ddc6ee574a135b05884a311439ec738477491ef919008c041108265f3/index
   SERVICE_URL: 'http://yzluck.cn/webhook/home/b271bff12a8c737c51cb915f9adb6ab674fe66e65b88fd13439ec738477491ef919008c041108265f3/index',

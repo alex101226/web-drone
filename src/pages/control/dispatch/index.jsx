@@ -49,17 +49,17 @@ const CarControl = () => {
         headerName: '路线名称',
         field: 'route_name',
         flex: 1, minWidth: 150,
-        renderCell: (params) => {
-          return params.value ? <IconButton
-              aria-label="copy"
-              size="small"
-              onClick={() => onCopy(params.value)}>
-            <Text component="div" color="textPrimary">
-              {renderCellExpand(params)}
-            </Text>
-            <ContentCopyIcon fontSize="inherit" />
-          </IconButton> : '--'
-        }
+        // renderCell: (params) => {
+        //   return params.value ? <IconButton
+        //       aria-label="copy"
+        //       size="small"
+        //       onClick={() => onCopy(params.value)}>
+        //     <Text component="div" color="textPrimary">
+        //       {renderCellExpand(params)}
+        //     </Text>
+        //     <ContentCopyIcon fontSize="inherit" />
+        //   </IconButton> : '--'
+        // }
       },
       { headerName: '预计时长（H）', field: 'expect_complete_time', flex: 1, minWidth: 150, renderCell: renderEmptyFilter },
       {

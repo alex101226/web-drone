@@ -67,8 +67,8 @@ const Nest = () => {
       field: 'status',
       flex: 1, minWidth: 100,
       valueOptions: NEST_STATUS_OPTIONS,
-      renderCell: ({value, row}) => {
-        return renderNestStatus(value, row.status_label)
+      renderCell: ({value}) => {
+        return renderNestStatus(value)
       }
     },
     {

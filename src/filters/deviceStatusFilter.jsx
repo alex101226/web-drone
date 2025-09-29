@@ -3,11 +3,24 @@ import { renderRadiusContained } from '@/filters';
 /**
  * 机巢状态
  * @value status
- * @returns {{NEST_STATUS_OPTIONS: string[], renderNestStatus: ((function(*): (string|*))|*)}}
+ * @returns {{NEST_STATUS_OPTIONS: number[], renderNestStatus: ((function(*): (number|*))|*)}}
  * 1: 正常，2: 维护，3: 停用
  */
 export const nestStatusFilter = () => {
-  const NEST_STATUS_OPTIONS = ['1', '2', '3']
+  const NEST_STATUS_OPTIONS = [1, 2, 3]
+
+  //  文案
+  const statusText = (status) => {
+    switch (status) {
+      case 2:
+        return '维护'
+      case 3:
+        return '停用'
+      default:
+      case 1:
+        return '可用'
+    }
+  }
 
   //  颜色
   const statusColor = (status) => {
@@ -22,11 +35,13 @@ export const nestStatusFilter = () => {
     }
   }
 
-  const renderNestStatus = (value, text) => {
+  const renderNestStatus = (value) => {
     if (value == null) {
       return '';
     }
-    return renderRadiusContained(text)(statusColor(value))()
+    const color = statusColor(value)
+    const text = statusText(value)
+    return renderRadiusContained(text)(color)()
   }
   return { NEST_STATUS_OPTIONS, renderNestStatus }
 }

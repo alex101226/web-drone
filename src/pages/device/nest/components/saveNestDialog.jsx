@@ -19,7 +19,7 @@ const initialState = {
   status: 1,
   longitude: 0,
   latitude: 0,
-  area: 1
+  area: ''
 }
 
 const SaveNestDialog = (props) => {
@@ -156,16 +156,14 @@ const SaveNestDialog = (props) => {
     })
   }
 
+  const updateArea = (data) => {
+    setValue('longitude', data.lng)
+    setValue('latitude', data.lat)
+  }
+
   //  获取定位
   const savePosition = (position) => {
-    reset({
-      longitude: position.lng,
-      latitude: position.lat,
-    }, {
-      keepDirty: true,     // 保留已改动的字段状态
-      keepErrors: true,    // 保留错误
-      keepTouched: true    // 保留触碰状态
-    });
+    updateArea(position)
   }
 
   //  提交按钮
@@ -292,19 +290,23 @@ const SaveNestDialog = (props) => {
   const renderContent = () => {
     return <Box component="form">
       { type !== 'read' ? renderActionContent() : null}
-
       <Box sx={{ height: type !== 'read' ? '500px' : 'calc(100vh - 128px)' }}>
-        <MapGL3D
-            center={currentArea.center}
-            radius={currentArea.radius}
-            data={data}
-            zoom={ 14 }
-            tilt={60}
-            heading={45}
-            savePosition={savePosition}
-            mode="nest"
-            disabled={type === 'read'}
-        />
+        {
+          area
+              ?   <MapGL3D
+                  center={currentArea.center}
+                  radius={currentArea.radius}
+                  data={data}
+                  zoom={ 14 }
+                  tilt={60}
+                  heading={45}
+                  savePosition={savePosition}
+                  mode="nest"
+                  disabled={type === 'read'}
+                  area={area}
+              />
+              : null
+        }
       </Box>
     </Box>;
   }

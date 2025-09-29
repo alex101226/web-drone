@@ -25,13 +25,6 @@ const Pilot = () => {
     },
     {headerName: '飞行执照', field: 'license_no', flex: 1,},
     {
-      headerName: '执照照片',
-      field: 'license_photo',
-      flex: 1,
-      minWidth: 150,
-      renderCell: (params) => <CustomImage img={params.value} />
-    },
-    {
       headerName: '状态',
       field: 'status',
       flex: 1,
@@ -41,7 +34,14 @@ const Pilot = () => {
     },
     {headerName: '飞行时长（H）', field: 'total_hours', flex: 1,},
     {
-      headerName: '',
+      headerName: '备注',
+      field: 'license_photo',
+      flex: 1,
+      minWidth: 150,
+      renderCell: (params) => <CustomImage img={params.value} />
+    },
+    {
+      headerName: '操作',
       field: 'action',
       flex: 1,
       minWidth: 200,

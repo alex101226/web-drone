@@ -15,7 +15,7 @@ const initialState = {
   remark: '',
   expect_complete_time: '1',
   points: [],
-  area: 1
+  area: ''
 }
 
 const InputHelp = styled(FormHelperText)({
@@ -266,19 +266,23 @@ const SaveRouteDrawer = props => {
     return (
         <Box component="form" sx={{ flex: 1 }}>
           { type !== 'read' ? renderActionContent() : null}
-
           <Box sx={{height: type !== 'read' ? '500px' : 'calc(100vh - 128px)'}}>
-            <MapGL3D
-                center={currentArea.center}
-                radius={currentArea.radius}
-                multiple
-                zoom={ 14 }
-                tilt={60}
-                heading={45}
-                disabled={type === 'read'}
-                data={points || []}
-                savePosition={savePosition}
-            />
+            {
+              area
+                  ?  <MapGL3D
+                      center={currentArea.center}
+                      radius={currentArea.radius}
+                      multiple
+                      zoom={ 14 }
+                      tilt={60}
+                      heading={45}
+                      disabled={type === 'read'}
+                      data={points || []}
+                      area={area}
+                      savePosition={savePosition}
+                  />
+                  : null
+            }
           </Box>
         </Box>
     )

@@ -26,7 +26,7 @@ export default function MapGL3D(props) {
     multiple = false,
     mode = 'nest',
     radius = '500',
-    disabled = false
+    disabled = false,
   } = props
 
   const mapRef = useRef(null);  //  渲染地图容器
@@ -167,8 +167,12 @@ export default function MapGL3D(props) {
   };
 
   // 单点模式的信息窗口（保持和你之前的一致）
-  const showInfoWindowSingle = (bMap, map, pt) => {
+  const showInfoWindowSingle = ( pt) => {
     if (mode === 'nest') {
+      const setMap = () => mapInsRef.current
+      if (!setMap()) return;
+      const bMap = bMapRef.current;
+
       const {Point, InfoWindow} = bMap
       const point = new Point(pt.lng, pt.lat);
 
@@ -242,7 +246,6 @@ export default function MapGL3D(props) {
     }
   }, [center, radius])
 
-
   //  初始化多标注点
   const initMultiple = (bMap, map) => {
 
@@ -275,7 +278,7 @@ export default function MapGL3D(props) {
     if (data) {
       const lng = data.longitude;
       const lat = data.latitude;
-      showInfoWindowSingle(bMap, map, {lng, lat});
+      showInfoWindowSingle({lng, lat});
     }
     // 地图点击时展示信息窗口
     map.addEventListener('click', (e) => {
@@ -290,7 +293,7 @@ export default function MapGL3D(props) {
           setRadius(point);
         }
         savePosition(point);
-        showInfoWindowSingle(bMap, map, point);
+        showInfoWindowSingle(point);
       };
 
       if (mode === 'area') {
@@ -411,22 +414,6 @@ export default function MapGL3D(props) {
 
   return (
       <Box sx={{ width: style.width, height: style.height, position: 'relative' }}>
-        {/*{*/}
-        {/*  disabled ?*/}
-        {/*      <Box*/}
-        {/*          sx={{*/}
-        {/*            position:'absolute',*/}
-        {/*            width: '100%',*/}
-        {/*            height: '100%',*/}
-        {/*            left: '0',*/}
-        {/*            top: '0',*/}
-        {/*            zIndex: 11,*/}
-        {/*            backgroundColor: 'rgba(0, 0, 0, 0.38)',*/}
-        {/*          }}*/}
-        {/*      />*/}
-        {/*      : null*/}
-        {/*}*/}
-
         <Box ref={mapRef}
              sx={{ width: style.width, height: style.height }}/>
       </Box>
