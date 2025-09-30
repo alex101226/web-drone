@@ -1,8 +1,8 @@
-import React, {useEffect, useState} from "react";
+import React, {useCallback, useEffect, useState} from "react";
 import {Controller, useForm} from "react-hook-form";
 import {
   Box, AppBar, Button, Toolbar, Divider, FormControl, InputAdornment,
-  FormHelperText, InputLabel, OutlinedInput, styled, Select, MenuItem,
+  FormHelperText, InputLabel, OutlinedInput, styled, Select, MenuItem, Typography,
 } from "@mui/material";
 import CustomDrawer from "@/components/customDrawer";
 import MapGL3D from '@/components/mapGL3D'
@@ -14,7 +14,7 @@ const initialState = {
   center_lng: 113.631900,
   center_lat: 34.752900,
   radius: '5000',
-  area: 1
+  district_id: '410100'
 }
 
 const InputHelp = styled(FormHelperText)({
@@ -38,18 +38,16 @@ const SaveAreaDrawer = props => {
     mode: 'onChange',
   });
 
-  // const lng = watch('center_lng')
-  // const lat = watch('center_lat')
+  const lng = watch('center_lng')
+  const lat = watch('center_lat')
   const radius = watch('radius')
 
-  const area = watch('area')
-
   /// 区域接口
-  const [areaOptions, setAreaOptions] = useState([]);
+  const [regionOptions, setRegionOptions] = useState([]);
   const fetchRegion = () => {
     getRegion().then(res => {
       if (res.code === 0) {
-        setAreaOptions(res.data)
+        setRegionOptions(res.data)
       }
     })
   }
@@ -70,24 +68,35 @@ const SaveAreaDrawer = props => {
     updateArea(data)
   }
 
-  useEffect(() => {
-    if (areaOptions.length) {
-      const find = areaOptions.find(item => item.id === area)
-      if (find) {
-        updateArea({
-          lng: find.lng,
-          lat: find.lat,
-        })
-      }
-    }
-  }, [area, areaOptions])
+  //  保存data
+  const [currentArea, setCurrentArea] = useState( {
+    lng: 113.631900,
+    lat: 34.752900
+  })
 
-  const getCenter = () => {
-    return {
-      lng: getValues('center_lng'),
-      lat: getValues('center_lat')
+  const setArea = useCallback((id) => {
+
+    const find = regionOptions.find(item => id === item.district_id)
+    const obj = find || regionOptions[0]
+    if (obj) {
+      setCurrentArea(obj || origin)
+      updateArea(obj || origin )
     }
+  }, [regionOptions])
+
+  //  市区选择
+  const handleArea = (event, field) => {
+    field.onChange(event)
+    setArea(event.target.value)
   }
+
+  //  回显表单数据
+  useEffect(() => {
+    if (data && open) {
+      setArea(data.id)
+      reset({...data})
+    }
+  }, [data, setArea])
 
   //  关闭
   const handleClose = (flag) => {
@@ -149,6 +158,7 @@ const SaveAreaDrawer = props => {
   const handleRadius = (event) => {
     setValue('radius', event.target.value)
   }
+
   //  内容
   const renderContent = () => {
     return (
@@ -168,7 +178,7 @@ const SaveAreaDrawer = props => {
               {errors.zone_name?.message}
             </InputHelp>
           </FormControl>
-          <FormControl fullWidth error={!!errors.expect_complete_time} margin="normal">
+          <FormControl fullWidth error={!!errors.radius} margin="normal">
             <InputLabel htmlFor="radius">可选区域半径</InputLabel>
             <OutlinedInput
                 label="可选区域半径"
@@ -185,39 +195,46 @@ const SaveAreaDrawer = props => {
               {errors.radius?.message}
             </InputHelp>
           </FormControl>
-          <Controller
-              name="area"
-              control={control}
-              render={({ field}) => (
-                  <FormControl fullWidth margin="normal">
-                    <InputLabel id="area-label">市区选择</InputLabel>
-                    <Select
-                        labelId="area-label"
-                        id="area"
-                        label="市区选择"
-                        value={field.value}
-                        onChange={(event) => field.onChange(event.target.value)}>
-                      {
-                        areaOptions.map((item) => (
-                            <MenuItem key={item.id} value={item.id}>
-                              { item.name }
-                            </MenuItem>
-                        ))
-                      }
-                    </Select>
-                  </FormControl>
-              )}
-          />
+          {
+            type === 'add' && regionOptions.length > 0
+              ? <Controller
+                    name="district_id"
+                    control={control}
+                    render={({ field}) => {
+                      return (
+                          <FormControl fullWidth margin="normal">
+                            <InputLabel id="district_id-label">市区选择</InputLabel>
+                            <Select
+                                labelId="district_id-label"
+                                id="district_id"
+                                label="市区选择"
+                                value={field.value || ''}
+                                onChange={(event) => handleArea(event, field)}>
+                              {
+                                regionOptions.map((item, index) => (
+                                    <MenuItem key={index} value={item.district_id}>
+                                      { item.name }
+                                    </MenuItem>
+                                ))
+                              }
+                            </Select>
+                          </FormControl>
+                      )
+                    }}
+                />
+                : null
+          }
 
           <Box sx={{height: '500px', position: 'relative'}}>
             <MapGL3D
                 mode="area"
-                center={getCenter()}
+                center={currentArea}
+                radius={radius}
+                data={{lng, lat}}
                 zoom={ 14 }
                 tilt={60}
                 heading={45}
-                disabled={!isAdd()}
-                radius={radius}
+                disabled={type !== 'add'}
                 savePosition={savePosition}
             />
           </Box>

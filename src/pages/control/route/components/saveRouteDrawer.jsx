@@ -83,34 +83,45 @@ const SaveRouteDrawer = props => {
     })
   }
 
-  const currentArea = useMemo(() => {
-    if (areaOptions.length > 0) {
-      const find = areaOptions.find((item) => item.id === area);
-      const data = find || areaOptions[0]
-      return {
-        center: {
-          lng: data.center_lng,
-          lat: data.center_lat
-        },
-        radius: data.radius
-      }
-    }
-
-    return {
-      center: {
-        lng: 113.631900,
-        lat: 34.752900
-      },
-      radius: 5000
-    }
-  }, [area, areaOptions])
-
-
   useEffect(() => {
     if (open) {
       fetchRegion()
     }
   }, [open])
+
+  //  更新路线数据
+  const savePosition = (data) => {
+    setValue('points', data)
+  }
+
+  const currentArea = useMemo(() => {
+    const find = areaOptions.find(item => area === item.id)
+    const obj = find || areaOptions?.[0]
+    if (obj) {
+      return {
+        id: obj.id,
+        center: {
+          lng: obj?.center_lng,
+          lat: obj?.center_lat
+        },
+        radius: obj?.radius,
+      }
+    }
+    return null;
+  }, [area, areaOptions])
+
+  useEffect(() => {
+    if (currentArea && type === 'add') {
+      setValue('area', currentArea.id)
+    }
+  }, [currentArea])
+
+  //  修改状态
+  const changeStatus = (event) => {
+    const value = event.target.checked
+    setValue('status', value ? '1' : '0')
+  }
+
   //  关闭
   const handleClose = (flag) => {
     reset(initialState)
@@ -137,11 +148,11 @@ const SaveRouteDrawer = props => {
   }
 
   //  执行修改  postLogisticsSetting
-  const onUpdate = (data) => {
-    if (loading) return false;
-    const params = {
-      ...data,
+  const onUpdate = (params) => {
+    if (data.current_is_used === '1') {
+      message.warning('当前路线正在使用，无法修改')
     }
+    if (loading) return false;
     setLoading(true)
     postLogisticsSetting(params).then((res) => {
       if (res.code === 0) {
@@ -166,16 +177,6 @@ const SaveRouteDrawer = props => {
     }
   }
 
-  //  查看地图
-  const savePosition = (data) => {
-    setValue('points', data)
-  }
-
-  const changeStatus = (event) => {
-    const value = event.target.checked
-    setValue('status', value ? '1' : '0')
-  }
-
   const renderActionContent = () => {
     return (
         <Fragment>
@@ -188,6 +189,7 @@ const SaveRouteDrawer = props => {
                 {...register("route_name", {
                   required: '请输入路线名称',
                 })}
+                disabled={type === 'read'}
             />
             <InputHelp id="route_name-helper-text">
               {errors.route_name?.message}
@@ -199,6 +201,7 @@ const SaveRouteDrawer = props => {
                     checked={status === '1'}
                     color="success"
                     onChange={changeStatus}
+                    disabled={type === 'read'}
                 />}
                 label="路线状态"
                 labelPlacement="start"
@@ -213,6 +216,7 @@ const SaveRouteDrawer = props => {
                 {...register("expect_complete_time", {
                   required: '请输入预计巡航时间',
                 })}
+                disabled={type === 'read'}
                 endAdornment={<InputAdornment position="end">小时</InputAdornment>}
             />
             <InputHelp id="expect_complete_time-helper-text">
@@ -228,6 +232,7 @@ const SaveRouteDrawer = props => {
                 {...register("remark", {
                   required: '请输入路线描述',
                 })}
+                disabled={type === 'read'}
             />
             <InputHelp id="remark-helper-text">
               {errors.remark?.message}
@@ -244,9 +249,9 @@ const SaveRouteDrawer = props => {
                         labelId="area-label"
                         id="area"
                         label="区域范围"
+                        disabled={type !== 'add'}
                         value={field.value}
-                        disabled={!isAdd()}
-                        onChange={(newValue) => field.onChange(newValue)}>
+                        onChange={(event) => field.onChange(event)}>
                       {
                         areaOptions.map((item) => (
                             <MenuItem key={item.id} value={item.id}>
@@ -265,21 +270,20 @@ const SaveRouteDrawer = props => {
   const renderContent = () => {
     return (
         <Box component="form" sx={{ flex: 1 }}>
-          { type !== 'read' ? renderActionContent() : null}
+          { renderActionContent() }
           <Box sx={{height: type !== 'read' ? '500px' : 'calc(100vh - 128px)'}}>
             {
-              area
-                  ?  <MapGL3D
+              !!currentArea
+                ? <MapGL3D
                       center={currentArea.center}
                       radius={currentArea.radius}
-                      multiple
                       zoom={ 14 }
                       tilt={60}
                       heading={45}
                       disabled={type === 'read'}
                       data={points || []}
-                      area={area}
                       savePosition={savePosition}
+                      mode="route"
                   />
                   : null
             }

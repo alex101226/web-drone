@@ -106,7 +106,7 @@ const CarLogisticsRoute = () => {
   }
 
   //  查看路线
-  const [record, setRecord] = useState({})
+  const [record, setRecord] = useState(null)
   const [type, setType] = useState('add')
   const [open, setOpen] = useState(false)
   const onAction = (type, row) => () => {

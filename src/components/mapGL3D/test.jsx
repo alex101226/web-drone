@@ -1,6 +1,7 @@
-import { useEffect, useRef } from 'react';
-import { useBMapGL } from '@/hooks/useBMapGL'
+import React, { useEffect, useRef } from 'react';
 import { Box } from "@mui/material";
+import { useBMapGL } from '@/hooks/useBMapGL'
+import {message} from "@/utils/index.js";
 
 /**
  * props:
@@ -10,30 +11,36 @@ import { Box } from "@mui/material";
  *  - savePosition: 回调函数。single 模式回传 geocoder 的 res（和你原来一样）
  *                  multiple 模式回传 pointsArray: [{ id, lng, lat, name, address }]
  *  - multiple: boolean, 默认 false
+ *  mode: nest | area | route
+ *  radius: 可选区域半径
  */
 export default function MapGL3D(props) {
   const {
-    center = { lat: 34.752900, lng: 113.631900 },
+    center = {lng: 116.404, lat: 39.915},
     zoom = 15,
     tilt = 73,
     heading = 64.5,
-    style = { width: '100%', height: '100%' },
+    style = {width: '100%', height: '100%'},
     data,
     savePosition,
-    multiple = false
-  } = props;
+    multiple = false,
+    mode = 'nest',
+    radius = '500',
+    disabled = false,
+  } = props
 
-  const mapRef = useRef(null);
+  const mapRef = useRef(null);  //  渲染地图容器
 
   // 存放一些不需要触发组件重渲染的实例和状态
   const bMapRef = useRef(null);         // BMapGL 命名空间
   const mapInsRef = useRef(null);       // 地图实例
   const geocoderRef = useRef(null);     // 地址解析对象
-  const pointMarkersRef = useRef(new Map()); // 存放 marker（id -> marker）
+  const markersRef = useRef(new Map()); // 存放 marker（id -> marker）
   const routePointsRef = useRef([]);    // 路径点数组 [{id, lng, lat, name, address}]
   const polylineRef = useRef(null);     // 折线覆盖物
-  const tileLayerRef = useRef(null);    // 自定义图层
+  // const tileLayerRef = useRef(null);    // 自定义图层
   const centerMarkerRef = useRef(null); //  中心点的标注
+  const radiusMarkerRef = useRef(null); //  可选区域
 
   // 标准化点对象（兼容多种字段名）
   const normalizePoint = (p) => {
@@ -88,7 +95,7 @@ export default function MapGL3D(props) {
    */
   const refreshMarkerIcons = (bMap) => {
     routePointsRef.current.forEach((p, idx) => {
-      const marker = pointMarkersRef.current.get(p.id);
+      const marker = markersRef.current.get(p.id);
       if (marker) {
         const icon = createNumberIcon(bMap, idx + 1);
         marker.setIcon(icon);
@@ -98,27 +105,26 @@ export default function MapGL3D(props) {
 
   // 删除某个点
   const removePoint = (bMap, map, id) => {
-    const marker = pointMarkersRef.current.get(id);
+    const marker = markersRef.current.get(id);
     if (marker) {
       map.removeOverlay(marker);
-      pointMarkersRef.current.delete(id);
+      markersRef.current.delete(id);
     }
     routePointsRef.current = routePointsRef.current.filter(p => p.id !== id);
     redrawPolyline(bMap, map);
     refreshMarkerIcons(bMap); // 更新序号
-    if (typeof savePosition === "function") {
-      savePosition(routePointsRef.current.slice());
-    }
+    savePosition(routePointsRef.current.slice());
   };
 
   /**
    * 为点创建 marker 并绑定事件（右键删除、拖拽更新）
-   * 注意：pointMarkersRef 存储的是 { marker, label }
+   * 注意：markersRef 存储的是 { marker, label }
    */
   const createMarkerForPoint = (bMap, map, pointObj, index) => {
-    const pt = new bMap.Point(pointObj.lng, pointObj.lat);
+    const {Point, Marker} = bMap
+    const pt = new Point(pointObj.lng, pointObj.lat);
     const icon = createNumberIcon(bMap, index + 1);
-    const marker = new bMap.Marker(pt, { icon });
+    const marker = new Marker(pt, { icon });
 
     marker.enableDragging && marker.enableDragging();
     marker.addEventListener('dragend', (ev) => {
@@ -127,9 +133,7 @@ export default function MapGL3D(props) {
       if (idx !== -1) {
         routePointsRef.current[idx].lng = pos.lng;
         routePointsRef.current[idx].lat = pos.lat;
-        if (typeof savePosition === "function") {
-          savePosition(routePointsRef.current.slice());
-        }
+        savePosition(routePointsRef.current.slice());
         redrawPolyline(bMap, map);
       }
     });
@@ -138,58 +142,83 @@ export default function MapGL3D(props) {
     marker.addEventListener('rightclick', () => {
       removePoint(bMap, map, pointObj.id);
     });
+
     map.addOverlay(marker);
-    pointMarkersRef.current.set(pointObj.id, marker);
+    markersRef.current.set(pointObj.id, marker);
   };
 
   // 添加新点（地图点击时调用，multiple 模式）
-  const addPoint = (bMap, map, clickedPoint) => {
-    geocoderRef.current.getLocation(clickedPoint, (res) => {
+  const addPoint = (clickedPoint) => {
+    console.log('这里做了修改的', clickedPoint)
+    const setMap = () => mapInsRef.current
+    if (!setMap()) return;
+    const bMap = bMapRef.current;
+    const { Point } = bMap
+    const point = new Point(clickedPoint.lng, clickedPoint.lat);
+    geocoderRef.current.getLocation(point, (res) => {
       const name = res && res.surroundingPois && res.surroundingPois[0] ? res.surroundingPois[0].title : '';
       const address = res ? res.address : '';
       const p = normalizePoint({ lng: clickedPoint.lng, lat: clickedPoint.lat, name, address });
       routePointsRef.current.push(p);
 
       // 创建 marker 并重绘
-      createMarkerForPoint(bMap, map, p, routePointsRef.current.length - 1);
-      redrawPolyline(bMap, map);
+      createMarkerForPoint(bMap, setMap(), p, routePointsRef.current.length - 1);
+      redrawPolyline(bMap, setMap());
       refreshMarkerIcons(bMap)
 
       // 通知父组件
-      if (typeof savePosition === 'function') {
-        savePosition(routePointsRef.current.slice());
-      }
+      // savePosition(routePointsRef.current.slice());
     });
   };
 
   // 单点模式的信息窗口（保持和你之前的一致）
-  const showInfoWindowSingle = (bMap, map, pt) => {
-    geocoderRef.current.getLocation(pt, (res) => {
-      if (res) {
-        const current = res.surroundingPois && res.surroundingPois[0] ? res.surroundingPois[0] : null;
-        const sContent = `
+  const showInfoWindowSingle = (pt) => {
+    if (mode === 'nest') {
+      const setMap = () => mapInsRef.current
+      if (!setMap()) return;
+      const bMap = bMapRef.current;
+
+      const {Point, InfoWindow} = bMap
+      const point = new Point(pt.lng, pt.lat);
+      geocoderRef.current.getLocation(point, (res) => {
+        if (res) {
+          const current = res.surroundingPois && res.surroundingPois[0] ? res.surroundingPois[0] : null;
+          const sContent = `
           <h4 style="margin:0 0 5px 10px;">${current ? (current.title || '') : ''}</h4>
           <h5 style="margin:0 0 5px 10px;">地址：${res.address || ''}</h5>
         `;
-        const infoWindow = new bMap.InfoWindow(sContent);
-        map.openInfoWindow(infoWindow, pt);
-        if (typeof savePosition === 'function') {
-          savePosition(res); // 和原来保持一致
+          const infoWindow = new InfoWindow(sContent);
+          setMap().openInfoWindow(infoWindow, pt);
+          // savePosition(res); // 和原来保持一致
         }
-      }
-    });
+      });
+    }
   };
 
-  //  膝盖覆盖物和中心点
-  const setMarker = () => {
-    const map = mapInsRef.current
-    if (!map) return;
-
+  //  可选区域半径,只有区域规划才可以
+  const setRadius = (point) => {
+    const setMap = () => mapInsRef.current
+    if (!setMap()) return;
     const bMap = bMapRef.current;
+    const { Circle } = bMap
+    // 先清除
+    if (radiusMarkerRef.current) {
+      setMap().removeOverlay(radiusMarkerRef.current)
+      radiusMarkerRef.current = null
+    }
 
-    const point = new bMap.Point(center.lng, center.lat)
+    radiusMarkerRef.current = new Circle(point, radius, {
+      strokeColor: "blue",
+      strokeWeight: 2,
+      strokeOpacity: 0.5,
+      fillColor: "#blue",
+      fillOpacity: 0.1
+    });
+    setMap().addOverlay(radiusMarkerRef.current);
+  }
 
-    map.centerAndZoom(point, zoom);
+  //  标注
+  const addOverlay = (bMap, map, point) => {
     // 复用 marker
     if (!centerMarkerRef.current) {
       // 第一次创建
@@ -201,36 +230,98 @@ export default function MapGL3D(props) {
     }
   }
 
+  //  设置中心标注点
+  const setMarker = (c) => {
+    const map = mapInsRef.current
+    if (!map) return;
+    const bMap = bMapRef.current;
+
+    const {Point} = bMap;
+    const point = new Point(c.lng, c.lat)
+    addOverlay(bMap, map, point);
+    map.centerAndZoom(point, zoom);
+  }
+
+  //  先这样
+  const handlePoint = (point) => {
+    setMarker(point);
+    if (mode === 'area') {
+      setRadius(point);
+    }
+    showInfoWindowSingle(point);
+  };
+
+  //  判断标注点是否超出区域
+  const setDistance = (point, map) => {
+    const distance = map.getDistance(center, point);
+    if (distance <= radius) {
+      handlePoint(point);
+    } else {
+      message.warning('定位点已超出区域')
+    }
+  }
+
+  //  更新标注点
+  useEffect(() => {
+    if (mapInsRef.current) {
+      setMarker(center)
+      setRadius(center)
+    }
+  }, [center, radius])
+
+  //  区域选择发生变化后，data修改为center到数据
+  useEffect(() => {
+    if (mapInsRef.current) {
+      if (!multiple) {
+        setDistance(data, mapInsRef.current)
+      }
+    }
+  }, [data])
+
   //  初始化多标注点
   const initMultiple = (bMap, map) => {
     // 如果传入了点数组，先渲染出来
-    if (data.length > 0) {
+    const isArr = Array.isArray(data)
+    if (isArr && data.length > 0) {
       routePointsRef.current = data.map(normalizePoint);
       routePointsRef.current.forEach((p, idx) => {
         createMarkerForPoint(bMap, map, p, idx);
       });
       redrawPolyline(bMap, map);
     }
-    // 地图点击添加点
+    // 地图点击添加点  34.72691508, 113.61436508
     map.addEventListener('click', (e) => {
-      const pt = new bMap.Point(e.latlng.lng, e.latlng.lat);
-      addPoint(bMap, map, pt);
+      if (disabled) {
+        e.preventDefault();
+      }
+      setDistance()
+      savePosition(e.latlng)
+
+      // const point = e.latlng
+      // const distance = map.getDistance(center, point);
+      // if (distance <= radius) {
+      //   addPoint(bMap, map, point);
+      // } else {
+      //   message.warning('定位点已超出区域')
+      // }
     });
   }
 
   //  初始化单个标注点
   const initSingle = (bMap, map) => {
     // 单点模式：有传入数据时直接展示
-    if (data && (data.longitude || data.latitude || data.lng || data.lat)) {
-      const lng = data.longitude ?? data.lng;
-      const lat = data.latitude ?? data.lat;
-      const pt = new bMap.Point(lng, lat);
-      showInfoWindowSingle(bMap, map, pt);
+    if (data) {
+      // const lng = data.longitude;
+      // const lat = data.latitude;
+      showInfoWindowSingle(data);
     }
     // 地图点击时展示信息窗口
     map.addEventListener('click', (e) => {
-      const pt = new bMap.Point(e.latlng.lng, e.latlng.lat);
-      showInfoWindowSingle(bMap, map, pt);
+      if (disabled) {
+        e.preventDefault();
+      }
+      const point = e.latlng
+      savePosition(point);
     });
   }
 
@@ -254,36 +345,42 @@ export default function MapGL3D(props) {
         // 禁用浏览器右键菜单，便于右键删除标注
         const container = map.getContainer && map.getContainer();
         if (container && container.addEventListener) {
-          container.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-          });
+          container.addEventListener('contextmenu', (e) => e.preventDefault());
         }
         //  开启鼠标滚轮
         map.enableScrollWheelZoom(true);
         map.setHeading(heading);
         map.setTilt(tilt);
-        setMarker()
-
+        setMarker(center)
+        setRadius(center)
         // 自定义图层
         const isTilesPng = true;
-        const ts = 'pl';
-        const udtV = '20190102';
+        // const ts = 'pl';
+        // const udtV = '20190102';
         const tLayer = new bMap.TileLayer({ transparentPng: isTilesPng });
-        tLayer.zIndex = 110;
-        tLayer.getTilesUrl = function (point, level) {
-          if (!point || level < 0) return null;
-          const x = point.x, y = point.y;
-          return `//mapsv0.bdimg.com/tile/?udt=${udtV}&qt=tile&styles=${ts}&x=${x}&y=${y}&z=${level}`;
-        };
+        // tLayer.zIndex = 110;
+        // tLayer.getTilesUrl = function (point, level) {
+        //   if (!point || level < 0) return null;
+        //   const x = point.x, y = point.y;
+        //   return `//mapsv0.bdimg.com/tile/?udt=${udtV}&qt=tile&styles=${ts}&x=${x}&y=${y}&z=${level}`;
+        // };
         map.addTileLayer(tLayer);
-        tileLayerRef.current = tLayer;
+        // tileLayerRef.current = tLayer;
 
         // 必须开启 overlay 才能显示信息窗口
+        // map.setDisplayOptions({
+        //   overlay: true,
+        //   layer: false,
+        //   building: true,
+        //   // skyColors: ['rgba(186, 0, 255, 0)', 'rgba(186, 0, 255, 0.2)']
+        // });
+
+        // 👇 最关键：打开矢量图层，否则 Marker/Circle/Polyline 不显示
         map.setDisplayOptions({
-          overlay: true,
-          layer: false,
-          building: true,
-          // skyColors: ['rgba(186, 0, 255, 0)', 'rgba(186, 0, 255, 0.2)']
+          poi: true,        // 是否显示POI点
+          building: true,   // 是否显示3D建筑
+          skyColors: true,  // 天空背景
+          overlay: true     // ⚠️ 覆盖物层
         });
 
         // 地址解析对象
@@ -292,7 +389,8 @@ export default function MapGL3D(props) {
 
         // 初始数据处理
         if (multiple) {
-          initMultiple(bMap, map)
+          // 如果传入了点数组，先渲染出来
+          initMultiple(bMap, map);
         } else {
           initSingle(bMap, map);
         }
@@ -308,20 +406,20 @@ export default function MapGL3D(props) {
         const map = mapInsRef.current;
         if (map && bMapRef.current) {
           // 移除所有 marker
-          pointMarkersRef.current.forEach(mk => {
+          markersRef.current.forEach(mk => {
             try { map.removeOverlay(mk); } catch (e) {}
           });
-          pointMarkersRef.current.clear();
+          markersRef.current.clear();
           // 移除折线
           if (polylineRef.current) {
             try { map.removeOverlay(polylineRef.current); } catch (e) {}
             polylineRef.current = null;
           }
           // 移除图层
-          if (tileLayerRef.current) {
-            try { map.removeTileLayer(tileLayerRef.current); } catch (e) {}
-            tileLayerRef.current = null;
-          }
+          // if (tileLayerRef.current) {
+          //   try { map.removeTileLayer(tileLayerRef.current); } catch (e) {}
+          //   tileLayerRef.current = null;
+          // }
           // 清空覆盖物
           try { map.clearOverlays(); } catch(e) {}
         }
@@ -331,15 +429,10 @@ export default function MapGL3D(props) {
     };
   }, []); // 只在组件挂载时执行一次
 
-  //  更新标注点
-  useEffect(() => {
-    if (mapInsRef.current) {
-      setMarker()
-    }
-  }, [center])
-
-  return <Box
-      ref={mapRef}
-      sx={{ width: style.width, height: style.height }}
-  />;
+  return (
+      <Box sx={{ width: style.width, height: style.height, position: 'relative' }}>
+        <Box ref={mapRef}
+             sx={{ width: style.width, height: style.height }}/>
+      </Box>
+  );
 }

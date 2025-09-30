@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useMemo, useState} from 'react';
+import React, {Fragment, useCallback, useEffect, useMemo, useState} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Box, FormControl, FormHelperText, InputLabel, Button, Toolbar,
@@ -26,8 +26,6 @@ const SaveNestDialog = (props) => {
 
   const { open, onClose, data, type } = props;
 
-  const isAdd = () => type === 'add';
-
   const getTitle = () => {
     switch (type) {
       case 'update':
@@ -46,7 +44,7 @@ const SaveNestDialog = (props) => {
     control,
     reset,
     setValue,
-    watch
+    watch,
   } = useForm({
     defaultValues: initialState
   });
@@ -56,7 +54,8 @@ const SaveNestDialog = (props) => {
     getDict({ type: 'nest_status' }).then((res) => {
       if (res.code === 0) {
         setStatusOptions(res.data)
-        if (isAdd()) {
+        //  添加时设置默认值
+        if (type === 'add') {
           const find = res.data.length > 0 ? res.data[0] : null
           setValue('status', find ? find.sort : '', {
             shouldValidate: false,
@@ -66,8 +65,6 @@ const SaveNestDialog = (props) => {
       }
     })
   }
-
-  const area = watch('area')
 
   /// 区域接口
   const [areaOptions, setAreaOptions] = useState([]);
@@ -85,36 +82,55 @@ const SaveNestDialog = (props) => {
 
   useEffect(() => {
     if (open) {
-      //  等待新的接口
       fetchDict()
       fetchRegion()
-      if (data) {
-        reset({...data});
-      }
     }
   }, [open]);
 
+  //  这是data
+  const lng = watch('longitude')
+  const lat = watch('latitude')
+  const area = watch('area')
+  const updateArea = (data) => {
+    console.log('data', data)
+    setValue('longitude', data.lng)
+    setValue('latitude', data.lat)
+  }
+
   const currentArea = useMemo(() => {
-    if (areaOptions.length > 0) {
-      const find = areaOptions.find((item) => item.id === area);
-      const data = find || areaOptions[0]
+    const find = areaOptions.find(item => area === item.id)
+    const obj = find || areaOptions?.[0]
+    if (obj) {
       return {
+        id: obj.id,
         center: {
-          lng: data.center_lng,
-          lat: data.center_lat
+          lng: obj?.center_lng,
+          lat: obj?.center_lat
         },
-        radius: data.radius
+        radius: obj?.radius,
       }
     }
-
-    return {
-      center: {
-        lng: 113.631900,
-        lat: 34.752900
-      },
-      radius: 5000
-    }
+    return null;
   }, [area, areaOptions])
+
+  useEffect(() => {
+    if (currentArea && type === 'add') {
+      setValue('area', currentArea.id)
+      updateArea(currentArea.center)
+    }
+  }, [currentArea])
+
+  //  回显表单数据
+  useEffect(() => {
+    if (data) {
+      reset({...data});
+    }
+  }, [data])
+
+  //  获取定位
+  const savePosition = (position) => {
+    updateArea(position)
+  }
 
   //  关闭按钮
   const handleClose = (flag) => {
@@ -154,16 +170,6 @@ const SaveNestDialog = (props) => {
       message.error('修改失败')
       setLoading(false)
     })
-  }
-
-  const updateArea = (data) => {
-    setValue('longitude', data.lng)
-    setValue('latitude', data.lat)
-  }
-
-  //  获取定位
-  const savePosition = (position) => {
-    updateArea(position)
   }
 
   //  提交按钮
@@ -206,6 +212,7 @@ const SaveNestDialog = (props) => {
             <OutlinedInput
                 label="机巢名称"
                 id="nest_name"
+                disabled={type === 'read'}
                 aria-describedby="nest_name-helper-text"
                 {...register("nest_name", {
                   required: '请输入机巢名称',
@@ -224,6 +231,7 @@ const SaveNestDialog = (props) => {
                 label="无人机限制数量"
                 id="capacity"
                 aria-describedby="capacity-helper-text"
+                disabled={type !== 'add'}
             />
             <InputHelp id="capacity-helper-text">
               {errors.capacity?.message}
@@ -240,7 +248,7 @@ const SaveNestDialog = (props) => {
                         labelId="status-label"
                         id="status"
                         label="机巢状态"
-                        disabled={isAdd()}
+                        disabled={type !== 'update'}
                         {...field}>
                       {
                         statusOptions.map((item) => (
@@ -267,8 +275,9 @@ const SaveNestDialog = (props) => {
                         labelId="area-label"
                         id="area"
                         label="区域范围"
-                        disabled={!isAdd()}
-                        {...field}>
+                        disabled={type !== 'add'}
+                        value={field.value}
+                        onChange={(e) => field.onChange(e)}>
                       {
                         areaOptions.map((item) => (
                             <MenuItem key={item.id} value={item.id}>
@@ -289,21 +298,20 @@ const SaveNestDialog = (props) => {
   //  内容
   const renderContent = () => {
     return <Box component="form">
-      { type !== 'read' ? renderActionContent() : null}
+      {renderActionContent()}
       <Box sx={{ height: type !== 'read' ? '500px' : 'calc(100vh - 128px)' }}>
         {
-          area
-              ?   <MapGL3D
+          !!currentArea
+            ? <MapGL3D
                   center={currentArea.center}
                   radius={currentArea.radius}
-                  data={data}
+                  data={{lng, lat}}
                   zoom={ 14 }
                   tilt={60}
                   heading={45}
                   savePosition={savePosition}
                   mode="nest"
-                  disabled={type === 'read'}
-                  area={area}
+                  disabled={type !== 'add'}
               />
               : null
         }
