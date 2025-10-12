@@ -7,7 +7,7 @@ import { badgeClasses } from '@mui/material/Badge';
 import ChatBubbleOutlineOutlinedIcon from '@mui/icons-material/ChatBubbleOutlineOutlined';
 import CustomEmpty from "@/components/customEmpty";
 import { getMessage, readMessage } from '@/services'
-import { message } from '@/utils'
+import {coverDateString, message} from '@/utils'
 
 const CartBadge = styled(Badge)`
   & .${badgeClasses.badge} {
@@ -120,6 +120,16 @@ const InternalMsg = () => {
                   sx={{ whiteSpace: 'break-spaces', color: 'rgba(0, 0, 0, 0.6)' }}
               >
                 {item.content || '很长的内容...'}
+              </Typography>
+            </ListItemText>
+            <ListItemText
+            sx={{ position: 'absolute', bottom: '2px', right: '15px'}}>
+              <Typography
+                  variant="caption"
+                  component="p"
+                  sx={{ whiteSpace: 'break-spaces', color: 'rgba(0, 0, 0, 0.4)' }}
+              >
+                { coverDateString(item.created_at, '4') }
               </Typography>
             </ListItemText>
           </MenuItem>

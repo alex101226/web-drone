@@ -7,6 +7,7 @@ import PermissionButton from "@/components/permissionButton";
 import CustomPagination from '@/components/customPagination'
 import SaveNestDialog from './components/saveNestDialog'
 import {getNests} from '@/services'
+import ReadWeather from "@/pages/device/nest/components/readWeather.jsx";
 
 const PAGE_SIZE = 10
 const Nest = () => {
@@ -34,6 +35,7 @@ const Nest = () => {
 
   const savePage = (page) => {
     setPage(page)
+    fetchNest(page)
   }
   const { NEST_STATUS_OPTIONS, renderNestStatus } = nestStatusFilter()
   const getColumn = [
@@ -52,15 +54,15 @@ const Nest = () => {
     {
       headerName: '位置坐标',
       field: 'position',
-      flex: 1, minWidth: 150,
-      renderCell: ({ row }) => {
-        return `${row.longitude}, ${row.latitude}`
+      flex: 1, minWidth: 250,
+      renderCell: (params) => {
+        return renderCellExpand({...params, value: `${params.row.longitude}, ${params.row.latitude}` })
       }
     },
     {
       headerName: '无人机数量上限（个）',
       field: 'capacity',
-      flex: 1, minWidth: 100,
+      flex: 1, minWidth: 150,
     },
     {
       headerName: '状态',
@@ -74,7 +76,7 @@ const Nest = () => {
     {
       headerName: '操作',
       field: 'actions',
-      flex: 1, minWidth: 200,
+      flex: 1, minWidth: 250,
       renderCell: ({ row }) => {
         return <Box>
           <PermissionButton
@@ -88,6 +90,9 @@ const Nest = () => {
           <Button type="text" onClick={() => handleAction(row, 'read')}>
             查看
           </Button>
+          <Button type="text" onClick={() => handleAction(row, 'weather')}>
+            查看气象
+          </Button>
         </Box>
       }
     }
@@ -96,18 +101,27 @@ const Nest = () => {
   const [type, setType] = useState('add')
   const [open, setOpen] = useState(false)
   const [record, setRecord] = useState(null)
-
+  const [openWeather, setOpenWeather] = useState(false)
   //  添加,修改机巢
   const handleAction = (row, type) => {
     setType(type)
     setRecord(row)
-    setOpen(true)
+    if (type !== 'weather') {
+      setOpen(true)
+    } else {
+      setOpenWeather(true)
+    }
+
   }
-  const onClose = (flag) => {
+  const onClose = (type, flag) => {
     if (flag) {
       fetchNest(page)
     }
-    setOpen(false)
+    if (type === 'weather') {
+      setOpenWeather(false)
+    } else {
+      setOpen(false)
+    }
   }
 
   return (
@@ -134,8 +148,13 @@ const Nest = () => {
         <SaveNestDialog
             open={open}
             type={type}
+            record={record}
+            onClose={(flag) => onClose('save', flag)}
+        />
+        <ReadWeather
+            open={openWeather}
             data={record}
-            onClose={onClose}
+            onClose={() => onClose('weather', false)}
         />
       </Box>
   )

@@ -81,9 +81,11 @@ export default function MapGL3D(props) {
     const {Point, Marker} = bMap;
 
     const {lng, lat} = c
-
-    const point = new Point(lng, lat)
     centerRef.current = c
+    const point = new Point(lng, lat)
+
+    // 地图自动居中
+    // setMap().panTo(point);
     // 复用 marker
     if (!centerMarkerRef.current) {
       // 第一次创建
@@ -160,17 +162,19 @@ export default function MapGL3D(props) {
 
   //  当center和radius发生变化，地图坐标点和中心位置修改
   useEffect(() => {
-    if (centerRef.current !== center) {
+    if (centerMarkerRef.current !== center) {
+      setMarker(center)
+      setCircle(center)
+    }
+  }, [center, radius])
+
+  useEffect(() => {
+    if (mode === 'area' && centerRef.current !== center) {
       routePointsRef.current.forEach(point => {
         removePoint(point.id)
       })
     }
-
-    // radiusRef.current = radius
-    // centerRef.current = center
-    setMarker(center)
-    setCircle(center)
-  }, [center, radius])
+  }, [center, mode])
 
   // 绘制或刷新折线
   const redrawPolyline = (map) => {
@@ -273,7 +277,7 @@ export default function MapGL3D(props) {
       handlePoint(point);
     } else {
       const distance = map.getDistance(centerRef.current, point);
-      if (distance <= radius) {
+      if (distance <= radiusRef.current) {
         handlePoint(point);
       } else {
         message.warning('定位点已超出区域')
@@ -349,7 +353,6 @@ export default function MapGL3D(props) {
 
         // 地址解析对象
         geocoderRef.current = new Geocoder();
-
         if (mode === 'route') {
           const isArr = Array.isArray(data)
           if (isArr && data.length > 0) {

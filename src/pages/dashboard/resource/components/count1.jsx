@@ -61,7 +61,7 @@ const Count1 = (props) => {
                     <CustomRate color={item.cpuColor} rate={item.cpu_use_rate} />
                   </Box>
                   <Box sx={{ mb: 4, display: 'flex' }}>
-                    <Text>CPU使用率：</Text>
+                    <Text>GPU使用率：</Text>
                     <CustomRate color={item.gpuColor} rate={item.gpu_use_rate} />
                   </Box>
                   <Box sx={{  display: 'flex', justifyContent: 'space-between' }}>

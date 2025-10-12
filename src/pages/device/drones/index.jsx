@@ -367,7 +367,7 @@ const Drones = () => {
       />
       <SaveDroneDrawer
           open={saveOpen}
-          data={ record }
+          record={ record }
           type={type}
           onClose={ (flag) => onClose('save', flag) }
       />

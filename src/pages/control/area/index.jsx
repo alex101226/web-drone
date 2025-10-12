@@ -10,13 +10,13 @@ import { availableArea } from "@/services";
 const PAGE_SIZE = 10
 const Area = () => {
   const getColumn = [
-    { headerName: '序号', field: 'id', flex: 1, minWidth: 270, renderCell: renderCellExpand },
-    { headerName: '区域名称', field: 'zone_name', flex: 1, minWidth: 150 },
-    { headerName: '可选区域半径（米）', field: 'radius', flex: 1, minWidth: 150 },
+    { headerName: '序号', field: 'id', flex: 1, minWidth: 70, renderCell: renderCellExpand },
+    { headerName: '区域名称', field: 'zone_name', flex: 1, minWidth: 200 },
+    { headerName: '可选区域半径（米）', field: 'radius', flex: 1, minWidth: 200 },
     {
       headerName: '经纬度',
       field: 'position',
-      flex: 1, minWidth: 150,
+      flex: 1, minWidth: 250,
       renderCell: (params) => {
         return renderCellExpand({ ...params, value: `${params.row.center_lng}, ${params.row.center_lat}`})
       }

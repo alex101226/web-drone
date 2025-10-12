@@ -86,7 +86,9 @@ const HashrateCpu = () => {
             最新任务
           </Typography>
           <Tooltip title="更多">
-            <Button variant="text" endIcon={<MoreHorizIcon />} onClick={() => navigate('/dashboard/resource')}>
+            <Button
+                endIcon={<MoreHorizIcon size="large" sx={{ color: 'var(--custom-menu-color)' }} />}
+                onClick={() => navigate('/dashboard/resource')}>
             </Button>
           </Tooltip>
         </Box>

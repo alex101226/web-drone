@@ -181,7 +181,7 @@ export const getDispatch = async (params) => {
 
 //  获取气象数据  getWeather
 export const getWeather = async (params) => {
-  return await http.get(`/getWeather?city=${params.city}`)
+  return await http.get(`/getWeather?city=${params.city}&type=${params.type}`)
 }
 
 //  无人机反制系统数据 getAnti

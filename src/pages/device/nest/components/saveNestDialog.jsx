@@ -1,4 +1,4 @@
-import React, {Fragment, useCallback, useEffect, useMemo, useState} from 'react';
+import React, {Fragment, useEffect, useState} from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import {
   Box, FormControl, FormHelperText, InputLabel, Button, Toolbar,
@@ -24,7 +24,7 @@ const initialState = {
 
 const SaveNestDialog = (props) => {
 
-  const { open, onClose, data, type } = props;
+  const { open, onClose, record, type } = props;
 
   const getTitle = () => {
     switch (type) {
@@ -76,73 +76,80 @@ const SaveNestDialog = (props) => {
     availableArea(params).then(res => {
       if (res.code === 0) {
         setAreaOptions(res.data.data)
+        if (res.data.data.length > 0) {
+          updateArea(res.data.data, record?.id, type)
+        }
       }
     })
   }
 
+  const initFetch = () => {
+    fetchDict()
+    fetchRegion()
+  }
   useEffect(() => {
     if (open) {
-      fetchDict()
-      fetchRegion()
+      initFetch()
+      if (record) {
+        reset({...record});
+      }
     }
   }, [open]);
 
   //  这是data
   const lng = watch('longitude')
   const lat = watch('latitude')
-  const area = watch('area')
-  const updateArea = (data) => {
-    console.log('data', data)
-    setValue('longitude', data.lng)
-    setValue('latitude', data.lat)
+
+  const [currentArea, setCurrentArea] = useState({
+    center: {},
+    radius: 0
+  })
+  const updateArea = (list, data, actionType) => {
+    if (actionType === 'position') {
+      // 地图点击更新经纬度
+      setValue('longitude', data.lng);
+      setValue('latitude', data.lat);
+      return;
+    }
+
+    // 区域选择更新中心点与半径
+    const targetArea = actionType !== 'add' ? list.find(item => item.id === data) : list[0];
+    if (!targetArea) return;
+
+    const { center_lng, center_lat, radius, id } = targetArea;
+
+    setValue('area', id);
+    setValue('longitude', center_lng);
+    setValue('latitude', center_lat);
+    setCurrentArea({
+      center: { lng: center_lng, lat: center_lat },
+      radius,
+    });
   }
 
-  const currentArea = useMemo(() => {
-    const find = areaOptions.find(item => area === item.id)
-    const obj = find || areaOptions?.[0]
-    if (obj) {
-      return {
-        id: obj.id,
-        center: {
-          lng: obj?.center_lng,
-          lat: obj?.center_lat
-        },
-        radius: obj?.radius,
-      }
-    }
-    return null;
-  }, [area, areaOptions])
-
-  useEffect(() => {
-    if (currentArea && type === 'add') {
-      setValue('area', currentArea.id)
-      updateArea(currentArea.center)
-    }
-  }, [currentArea])
-
-  //  回显表单数据
-  useEffect(() => {
-    if (data) {
-      reset({...data});
-    }
-  }, [data])
+  //  修改区域
+  const handleArea = (event, field) => {
+    field.onChange(event)
+    updateArea(areaOptions, event.target.value, 'update')
+  }
 
   //  获取定位
   const savePosition = (position) => {
-    updateArea(position)
+    updateArea(areaOptions, position, 'position')
   }
 
   //  关闭按钮
   const handleClose = (flag) => {
     reset()
+    setCurrentArea(null)
     onClose(flag)
   }
 
   const [loading, setLoading] = useState(false)
 
   //  添加执行
-  const onAdd = (data) => {
-    addNest(data).then(res => {
+  const onAdd = (params) => {
+    addNest(params).then(res => {
       if (res.code === 0) {
         handleClose(true)
         message.success('添加成功')
@@ -173,11 +180,11 @@ const SaveNestDialog = (props) => {
   }
 
   //  提交按钮
-  const onSubmit = (data) => {
+  const onSubmit = (params) => {
     if (type === 'add') {
-      onAdd(data)
+      onAdd(params)
     } else {
-      onUpdate(data)
+      onUpdate(params)
     }
   }
 
@@ -277,7 +284,7 @@ const SaveNestDialog = (props) => {
                         label="区域范围"
                         disabled={type !== 'add'}
                         value={field.value}
-                        onChange={(e) => field.onChange(e)}>
+                        onChange={(e) => handleArea(e, field)}>
                       {
                         areaOptions.map((item) => (
                             <MenuItem key={item.id} value={item.id}>
@@ -300,11 +307,12 @@ const SaveNestDialog = (props) => {
     return <Box component="form">
       {renderActionContent()}
       <Box sx={{ height: type !== 'read' ? '500px' : 'calc(100vh - 128px)' }}>
+        { currentArea?.center?.lng }, { currentArea?.center?.lat } , { currentArea?.radius }
         {
-          !!currentArea
-            ? <MapGL3D
-                  center={currentArea.center}
-                  radius={currentArea.radius}
+          currentArea?.radius
+              ? <MapGL3D
+                  center={currentArea?.center}
+                  radius={currentArea?.radius}
                   data={{lng, lat}}
                   zoom={ 14 }
                   tilt={60}
@@ -315,6 +323,7 @@ const SaveNestDialog = (props) => {
               />
               : null
         }
+
       </Box>
     </Box>;
   }

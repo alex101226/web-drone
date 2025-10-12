@@ -9,6 +9,7 @@ import CustomDrawer from '@/components/customDrawer'
 import {message} from '@/utils'
 import {addDrone, updateDrone, getOperators, getDict, getNests} from '@/services'
 import { useUserStore } from '@/store'
+import MapGL3D from "@/components/mapGL3D/index.jsx";
 
 const initialState = {
   drone_sn: '',
@@ -22,14 +23,14 @@ const initialState = {
   status: '1',
   latitude: '',
   longitude: '',
-  nest: 0
+  current_nest: ''
 }
 
 const InputHelp = styled(FormHelperText)({
   height: '20px'
 })
 const SaveDroneDrawer = (props) => {
-  const { open, onClose, data, type } = props
+  const { open, onClose, record, type } = props
 
   const isAdd = () =>  type === 'add';
   const {
@@ -48,7 +49,7 @@ const SaveDroneDrawer = (props) => {
   const useInfo = useUserStore(state => state.userInfo)
   //  飞手信息
   const [userData, setUserData] = useState([])
-  const fetchUser = (p = 1) => {
+  const fetchOperator = (p = 1) => {
     const params = {
       page: 1,
       pageSize: 1000,
@@ -78,20 +79,6 @@ const SaveDroneDrawer = (props) => {
     setCameraOptions(data)
   }
 
-  //  机巢
-  const [nestsOptions, setNestsOptions] = useState([])
-  const fetchNest = () => {
-    const params = {
-      page: 1,
-      pageSize: 1000,
-    }
-    getNests(params).then(({ data, code }) => {
-      if (code === 0) {
-        setNestsOptions(data.data)
-      }
-    })
-  }
-
   //  字典
   const fetchDict = (type) => {
     getDict({ type: type }).then((res) => {
@@ -108,42 +95,76 @@ const SaveDroneDrawer = (props) => {
     })
   }
 
+  //  机巢
+  const [nestsOptions, setNestsOptions] = useState([])
+  const fetchNest = () => {
+    const params = {
+      page: 1,
+      pageSize: 1000,
+    }
+    getNests(params).then(({ data, code }) => {
+      if (code === 0) {
+        setNestsOptions(data.data)
+        setNest(data.data, record, 'default')
+      }
+    })
+  }
+
   const initFetch = () => {
-    fetchUser()
+    fetchOperator()
+    fetchNest()
     fetchDict('drone_status')
     fetchDict('camera_model')
-    fetchNest()
+  }
+
+  //  修改时，获取nest
+  const [currentArea, setCurrentArea] = useState(null)
+  const setNest = (list, data, type) => {
+    if (!Array.isArray(list) || !list.length) return;
+
+    const find = list.find(item => {
+      if (type === 'change') {
+        return item.id === data;
+      }
+      // 经纬度都要匹配，避免误选
+      return item.longitude === data?.longitude && item.latitude === data?.latitude;
+    });
+
+    if (!find) return;
+
+    if (type === 'change') {
+      setValue('latitude', find.latitude);
+      setValue('longitude', find.longitude);
+    }
+
+    setCurrentArea({
+      center: {
+        lng: find.longitude,
+        lat: find.latitude,
+      },
+      radius: find.radius,
+    });
   }
 
   useEffect(() => {
     if (open) {
       initFetch()
+      if (record) {
+        reset({ ...record })
+      }
     }
   }, [open])
 
-  useEffect(() => {
-    if (data) {
-      reset({
-        ...data,
-        nest: 0
-      })
-    }
-  }, [data])
-
-  //  获取经纬度
-  const nest = watch('nest')
-  useEffect(() => {
-    const find = nestsOptions.find(item => item.id === nest)
-    if (find) {
-      setValue('latitude', find.latitude)
-      setValue('longitude', find.longitude)
-    }
-  }, [nest])
-
+  const handleLocation = (event, field) => {
+    const value = event.target.value
+    setNest(nestsOptions, value, 'change')
+    field.onChange(value)
+  }
   //  关闭窗口
   const handleClose = (flag) => {
-    onClose(flag)
+    setCurrentArea(null)
     reset()
+    onClose(flag)
   }
 
   //  照片上传
@@ -155,10 +176,10 @@ const SaveDroneDrawer = (props) => {
   }
 
   const [loading, setLoading] = useState(false)
-  const onAdd = (data) => {
+  const onAdd = (params) => {
     if (loading) return;
     setLoading(true)
-    addDrone(data).then(res => {
+    addDrone(params).then(res => {
       if (res.code === 0) {
         message.success('添加成功')
         handleClose(true)
@@ -173,10 +194,10 @@ const SaveDroneDrawer = (props) => {
   }
 
   //  执行修改
-  const onEdit = (data) => {
+  const onEdit = (params) => {
     if (loading) return;
     setLoading(true)
-    updateDrone(data).then(res => {
+    updateDrone(params).then(res => {
       if (res.code === 0) {
         message.success('修改成功')
         handleClose(true)
@@ -190,16 +211,32 @@ const SaveDroneDrawer = (props) => {
     })
   }
 
-  const onSubmit = (data) => {
+  const onSubmit = (params) => {
     if (type === 'add') {
-      onAdd(data)
+      onAdd(params)
     }
     if (type === 'edit') {
-      onEdit(data)
+      onEdit(params)
     }
   }
 
   const dronePhoto = watch('drone_photo'); // 监听 vehicle_photo
+
+  //  地图
+  const renderMap = () => {
+    return currentArea ? <Box sx={{ width: '100%', height: '300px'}}>
+      <MapGL3D
+          center={currentArea.center}
+          radius={currentArea.radius}
+          data={{lng: currentArea?.center?.lng, lat: currentArea?.center?.lat}}
+          zoom={ 14 }
+          tilt={60}
+          heading={45}
+          mode="drone"
+          disabled
+      />
+    </Box> : null
+  }
 
   const renderForm = () => {
     return (
@@ -329,6 +366,13 @@ const SaveDroneDrawer = (props) => {
                   </FormControl>
               )}
           />
+          <FormControl error={!!errors.drone_photo} margin="normal">
+            <CustomCardUpload
+                name="drone"
+                preview={dronePhoto}
+                onChangeUpload={onChangeUpload}
+            />
+          </FormControl>
           <Controller
               name="operator_id"
               control={control}
@@ -357,21 +401,21 @@ const SaveDroneDrawer = (props) => {
               )}
           />
           <Controller
-              name="nest"
+              name="current_nest"
               control={control}
               rules={{ required: '请选择无人机位置' }}
               render={({ field }) => {
                 return (
                     <FormControl fullWidth margin="normal">
-                      <InputLabel id="nest-label">无人机位置</InputLabel>
+                      <InputLabel id="current_nest-label">无人机位置</InputLabel>
                       <Select
-                          labelId="nest-label"
-                          id="nest"
+                          labelId="current_nest-label"
+                          id="current_nest"
                           label="无人机位置"
-                          aria-describedby="nest-helper-text"
-                          disabled={data && [2, 5].includes(data.status)}
+                          aria-describedby="current_nest-helper-text"
+                          disabled={record && [2, 5].includes(record.status)}
                           value={field.value}
-                          onChange={(newValue) => field.onChange(newValue)}>
+                          onChange={(value) => handleLocation(value, field)}>
                         {
                           nestsOptions.map((option, index) => (
                               <MenuItem key={index} value={option.id}>
@@ -384,13 +428,7 @@ const SaveDroneDrawer = (props) => {
                 )
               }}
           />
-          <FormControl error={!!errors.drone_photo} margin="normal">
-            <CustomCardUpload
-                name="drone"
-                preview={dronePhoto}
-                onChangeUpload={onChangeUpload}
-            />
-          </FormControl>
+          {renderMap()}
         </Box>
     )
   }

@@ -37,7 +37,8 @@ const ProjectFireDevice = () => {
   const { renderWeatherIcon } = weatherIconFilter()
   const fetchWeather = (city) => {
     const params = {
-      city
+      city,
+      type: 'weather',
     }
     getWeather(params).then((res) => {
       if (res.code === 0) {
