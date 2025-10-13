@@ -27,8 +27,9 @@ export default defineConfig({
     },
   },
   html: {
-    title: '越泰低空无人机与算力管理系统',
-    favicon: './src/assets/images/logo-1.svg', // 或者 public/favicon.ico
+    title: '',
+    // title: '越泰低空无人机与算力管理系统',
+    // favicon: './src/assets/images/logo-1.svg', // 或者 public/favicon.ico
   },
   server: {
     proxy: {
