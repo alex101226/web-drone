@@ -27,17 +27,17 @@ export default defineConfig({
     },
   },
   html: {
-    title: '',
-    // title: '越泰低空无人机与算力管理系统',
-    // favicon: './src/assets/images/logo-1.svg', // 或者 public/favicon.ico
+    title: '低空无人机与算力管理系统',
+    favicon: './src/assets/images/logo-1.svg', // 或者 public/favicon.ico
   },
   server: {
     proxy: {
       '/api': 'http://localhost:4000'
     }
   },
-  build: {
-    outDir: 'drone',
-    emptyOutDir: true, // ⚡ 打包前清空该文件夹
-  }
+  output: {
+    distPath: {
+      root: 'drone-front/build'
+    }
+  },
 });

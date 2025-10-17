@@ -21,11 +21,11 @@ const Header = () => {
   return (
       <AppBar position="fixed" elevation={0} component="header">
         <Toolbar>
-          {/*<SystemLogo />*/}
-          {/*<Box sx={{ ml: 14 }} />*/}
-          {/*<Typography component="div" noWrap fontWeight="600">*/}
-          {/*  {globalThis.CONSTANTS.SYSTEM_NAME}*/}
-          {/*</Typography>*/}
+          <SystemLogo />
+          <Box sx={{ ml: 14 }} />
+          <Typography component="div" noWrap fontWeight="600">
+            {globalThis.CONSTANTS.SYSTEM_NAME}
+          </Typography>
 
           <Box sx={{ flexGrow: 1, display: 'flex', alignItems: 'center', justifyContent: 'right' }}>
             { renderLoginHeaderRight() }
