@@ -232,7 +232,7 @@ const SaveDroneDrawer = (props) => {
           zoom={ 14 }
           tilt={60}
           heading={45}
-          mode="drone"
+          mode="nest"
           disabled
       />
     </Box> : null

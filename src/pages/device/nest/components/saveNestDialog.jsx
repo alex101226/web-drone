@@ -165,7 +165,7 @@ const SaveNestDialog = (props) => {
 
   //  修改执行
   const onUpdate = (params) => {
-    updateNest({ ...params, nest_id: data.id }).then(res => {
+    updateNest({ ...params, nest_id: record.id }).then(res => {
       if (res.code === 0) {
         message.success(res.message)
         handleClose(true)

@@ -81,6 +81,7 @@ const Login = () => {
         <FormInputLabel htmlFor="password-input">密码</FormInputLabel>
         <FormInput
             id="password-input"
+            type="password"
             aria-describedby="password-helper-text"
             label="密码"
             {...register("password", {
