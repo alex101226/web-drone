@@ -168,6 +168,26 @@ export const dispatch = async (data) => {
   return await http.post('/dispatch', data)
 }
 
+//	无人机的统计	droneInfoCount
+export const droneInfoCount = async () => {
+  return await http.get(`/droneInfoCount`)
+}
+
+//	统计无人机飞行时长	/api/flight/mileage
+export const flightMileageCount = async () => {
+  return await http.get(`/flight/mileage`)
+}
+
+//	查询所有无人机位置	dronePosition
+export const getDronePosition = async () => {
+  return await http.get('/dronePosition')
+}
+
+//	飞行统计	/flight/count
+export const getFlightCount = async () => {
+  return await http.get(`/flight/count`)
+}
+
 //  一键调度  dispatchBatch
 export const dispatchBatch = async (data) => {
   return await http.post('/dispatchBatch', data)

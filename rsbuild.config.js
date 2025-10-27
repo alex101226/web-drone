@@ -2,7 +2,7 @@ import { defineConfig } from '@rsbuild/core';
 import { pluginReact } from '@rsbuild/plugin-react';
 import { pluginTypeCheck } from '@rsbuild/plugin-type-check';
 import { pluginLess } from '@rsbuild/plugin-less';
-import path from 'path';
+import path from 'node:path';
 
 export default defineConfig({
   plugins: [

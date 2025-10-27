@@ -15,7 +15,8 @@ const initialState = {
   remark: '',
   expect_complete_time: '1',
   points: [],
-  area: ''
+  area: '',
+  mileage: ''
 }
 
 const InputHelp = styled(FormHelperText)({
@@ -60,6 +61,7 @@ const SaveRouteDrawer = props => {
         status: data.status,
         expect_complete_time: data.expect_complete_time,
         area: data.area,
+		mileage: data.mileage,
       }
       reset({ ...params })
     }
@@ -223,6 +225,22 @@ const SaveRouteDrawer = props => {
               {errors.expect_complete_time?.message}
             </InputHelp>
           </FormControl>
+		  <FormControl fullWidth error={!!errors.mileage} margin="normal">
+			<InputLabel htmlFor="mileage">里程数</InputLabel>
+			<OutlinedInput
+			  label="里程数"
+			  id="mileage"
+			  aria-describedby="mileage-helper-text"
+			  {...register("mileage", {
+				required: '请输入里程数',
+			  })}
+			  disabled={type === 'read'}
+			  endAdornment={<InputAdornment position="end">千米</InputAdornment>}
+			/>
+			<InputHelp id="mileage-helper-text">
+			  {errors.mileage?.message}
+			</InputHelp>
+		  </FormControl>
           <FormControl fullWidth error={!!errors.remark} margin="normal">
             <InputLabel htmlFor="remark">路线描述</InputLabel>
             <OutlinedInput
