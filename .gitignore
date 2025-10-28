@@ -5,14 +5,14 @@
 
 # Dist
 node_modules
-dist/
+drone/
+/drone-front
 
 # Profile
 .rspack-profile-*/
+/package-lock.json
 
 # IDE
 .vscode/*
 !.vscode/extensions.json
 .idea
-/drone-front
-/package-lock.json

@@ -36,8 +36,9 @@ export default defineConfig({
       '/api': 'http://localhost:4000'
     }
   },
-  build: {
-    outDir: 'drone',
-    emptyOutDir: true, // ⚡ 打包前清空该文件夹
+  output: {
+	distPath: {
+	  root: 'drone'
+	}
   }
 });

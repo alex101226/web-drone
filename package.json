@@ -8,6 +8,7 @@
     "build": "rsbuild build",
     "build:file": "rsbuild build && mv dist drone",
     "dev": "rsbuild dev --open --port 3002",
+    "start:prod": "NODE_ENV=production rsbuild dev --open --port 3002",
     "preview": "rsbuild preview"
   },
   "dependencies": {
