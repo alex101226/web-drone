@@ -66,7 +66,7 @@ const Sidebar = ({ children }) => {
           onClose={onClose}
       >
         <Toolbar>
-          <SystemLogo show={false} />
+          {/*<SystemLogo show={false} />*/}
         </Toolbar>
         <List>
           {children}

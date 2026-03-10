@@ -21,8 +21,8 @@ const Header = () => {
   return (
       <AppBar position="fixed" elevation={0} component="header">
         <Toolbar>
-          <SystemLogo />
-          <Box sx={{ ml: 14 }} />
+          {/*<SystemLogo />*/}
+          <Box sx={{ ml: 30 }} />
           <Typography component="div" noWrap fontWeight="600">
             {globalThis.CONSTANTS.SYSTEM_NAME}
           </Typography>
