@@ -23,7 +23,16 @@ const Layout = () => {
     return (
         <Box
             component="img"
-            sx={{ width: '56px', height: '56px', position: 'fixed', bottom: '200px', right: '16px', cursor: 'pointer', }}
+            sx={{
+              width: '48px',
+              height: '48px',
+              position: 'fixed',
+              bottom: '24px',
+              right: '20px',
+              zIndex: 1200,
+              cursor: 'pointer',
+              filter: 'drop-shadow(0 8px 14px rgba(24, 50, 79, 0.18))',
+            }}
             src={serviceImage}
             alt=""
             onClick={() => setServiceDrawer(true)}

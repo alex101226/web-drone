@@ -1,6 +1,6 @@
 import {useState, useEffect} from "react";
-import {Box, Grid} from '@mui/material'
-import CustomCard from "@/components/customCard";
+import {Box, Grid, Stack, Typography} from '@mui/material'
+import NorthEastRoundedIcon from '@mui/icons-material/NorthEastRounded';
 import Count1 from './components/count1'
 import Count3 from './components/count3'
 import Count6 from './components/count6'
@@ -64,40 +64,48 @@ const DroneCount = () => {
 	initFetch()
   }, [])
   return (
-	<Box>
-	  <CustomCard cardContentStyle={{
-		p: 0,
-		['&:last-child']: {
-		  paddingBottom: 0,
-		}
-	  }}>
-		<Box sx={{p: 2}}>
-		  {/*<CustomTabs*/}
-		  {/*activeTabValue={activeTab}*/}
-		  {/*tabs={tabs}*/}
-		  {/*fields={{ label: 'label', value: 'id' }}*/}
-		  {/*saveTab={setTab}*/}
-		  {/*/>*/}
-		  <Box sx={{mb: 2}} />
-		  <Count1 data={droneCount} />
-		  <Box sx={{mb: 2}} />
-		  <Grid container spacing={1}>
-			{/*<Grid size={3}>*/}
-			{/*  <Count2 xAxis={historyDate} totalData={historyMileage} />*/}
-			{/*  <Box sx={{mb: 2}} />*/}
-			{/*  <Count4 xAxis={historyDate} totalData={historyActual} />*/}
-			{/*</Grid>*/}
-			<Grid size="grow">
-			  <Count6 list={dronePosition} />
-			</Grid>
-			<Grid size={3}>
-			  <Count3 data={flightCount} />
-			  {/*<Box sx={{mb: 2}} />*/}
-			  {/*<Count5 />*/}
-			</Grid>
-		  </Grid>
+	<Box sx={{ width: '100%', pb: 2 }}>
+	  <Stack
+		direction={{ xs: 'column', sm: 'row' }}
+		justifyContent="space-between"
+		alignItems={{ xs: 'flex-start', sm: 'center' }}
+		spacing={1}
+		sx={{ mb: 3, pt: 0.5 }}
+	  >
+		<Box>
+		  <Typography
+			sx={{
+			  fontSize: { xs: 28, md: 34 },
+			  lineHeight: 1.15,
+			  fontWeight: 750,
+			  color: '#102A43',
+			  letterSpacing: -0.5,
+			}}
+		  >
+			低空智航中心
+		  </Typography>
+		  <Typography variant="body2" color="text.secondary" sx={{ mt: 0.85 }}>
+			全域感知 · 智能调度 · 安全飞行
+		  </Typography>
 		</Box>
-	  </CustomCard>
+		<Stack direction="row" spacing={1} alignItems="center" sx={{ color: '#486581' }}>
+		  <Typography variant="caption" sx={{ letterSpacing: 1.2 }}>LIVE OPERATION</Typography>
+		  <Box sx={{ width: 36, height: 36, display: 'grid', placeItems: 'center', borderRadius: '50%', border: '1px solid #D9E2EC' }}>
+			<NorthEastRoundedIcon sx={{ fontSize: 18 }} />
+		  </Box>
+		</Stack>
+	  </Stack>
+
+	  <Count1 data={droneCount} />
+
+	  <Grid container spacing={2.5} sx={{ mt: 0 }}>
+		<Grid size={{ xs: 12, lg: 8.5 }}>
+		  <Count6 list={dronePosition} />
+		</Grid>
+		<Grid size={{ xs: 12, lg: 3.5 }}>
+		  <Count3 data={flightCount} />
+		</Grid>
+	  </Grid>
 	</Box>
   )
 }
